@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  name      String?
+  image     String?
+  wallets   Wallet[]
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+  id           String        @id @default(cuid())
+  address      String        @unique
+  user         User?         @relation(fields: [userId], references: [id])
+  userId       String?
+  balance      Decimal?
+  reputation   Int           @default(0)
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+}
+
+model Coin {
+  id        String   @id @default(cuid())
+  symbol    String
+  name      String
+  logo      String?
+  marketCap Decimal?
+  liquidity Decimal?
+  holders   Int?
+  createdAt DateTime @default(now())
+}
+
+model Signal {
+  id         String   @id @default(cuid())
+  type       String
+  tokenId    String?
+  confidence Int
+  reasons    String?
+  indicators String?
+  risk       String?
+  createdAt  DateTime @default(now())
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  userId    String
+  signalId  String
+  delivered Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  tier      String
+  active    Boolean  @default(true)
+  startedAt DateTime @default(now())
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  walletId  String
+  token     String
+  amount    Decimal
+  side      String
+  timestamp DateTime
+}

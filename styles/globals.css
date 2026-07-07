@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --bg:#05060a;
+}
+
+body{
+  background-color:var(--bg);
+}
+
+/* Glass card */
+.card-glass{
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+}
+
+/* Neon heading */
+.text-neon{
+  color: #00f0ff;
+  text-shadow: 0 0 12px rgba(0,240,255,0.12);
+}
+
+/* Parallax layers */
+.parallax-viewport{ z-index: 0 }
+.parallax-layer{ position:absolute; inset:0; background-repeat:no-repeat; background-position:center; background-size:cover; opacity:0.12; filter: blur(6px); }
+.parallax-layer.layer-1{ background-image: radial-gradient(circle at 20% 20%, rgba(0,240,255,0.06), transparent 20%), radial-gradient(circle at 80% 40%, rgba(0,208,132,0.04), transparent 20%); }
+.parallax-layer.layer-2{ background-image: radial-gradient(circle at 60% 70%, rgba(96,165,250,0.05), transparent 25%), radial-gradient(circle at 30% 60%, rgba(253,230,138,0.04), transparent 18%); opacity:0.14; }
+.parallax-layer.layer-3{ background-image: linear-gradient(90deg, rgba(0,0,0,0.02), rgba(255,255,255,0.01)); opacity:0.06 }
+
+/* simple starfield overlay */
+.parallax-stars{ position:absolute; inset:0; background-image: radial-gradient(#fff 0.5px, transparent 0.6px); background-size: 16px 16px; opacity:0.06 }
+
+/* Game-like glow and title accent */
+.game-glow{ box-shadow: 0 8px 40px rgba(0,240,255,0.06), inset 0 1px 0 rgba(255,255,255,0.02) }
+
+/* utility for subtle floating */
+@keyframes floaty { 0%{ transform: translateY(0) } 50%{ transform: translateY(-6px) } 100%{ transform: translateY(0) } }
+.floaty { animation: floaty 6s ease-in-out infinite }
+
+/* Button theme */
+.btn-theme{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 33px;
+  border-radius: 9px;
+  background: #d5f365;
+  border: none;
+  color: #05060a;
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.4s, box-shadow 0.4s, background-color 0.4s;
+}
+.btn-theme:hover{
+  box-shadow: 7px 5px 56px -14px #c3d900;
+}
+.btn-theme:active{
+  transform: scale(0.97);
+  box-shadow: 7px 5px 56px -10px #c3d900;
+}
+.btn-theme-sm{
+  padding: 10px 18px;
+  font-size: 0.875rem;
+}
+
+/* Performance helpers */
+.parallax-layer, .parallax-stars { will-change: transform, opacity }
+
+/* Reduce parallax intensity on small screens */
+@media (max-width: 768px){
+  .parallax-layer, .parallax-stars{ display:none }
+  .floaty{ animation-duration: 10s }
+}
+
+/* Font utilities */
+.font-game{ font-family: 'Press Start 2P', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+.font-ui{ font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto }
+
+/* Apply pixel font to hero headings */
+.text-6xl, .text-7xl{ letter-spacing: -0.02em }

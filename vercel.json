@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "NEXTAUTH_URL": "https://whaleradar-ai.vercel.app"
+  }
+}
