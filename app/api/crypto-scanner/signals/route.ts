@@ -1,23 +1,43 @@
-import { NextResponse } from 'next/server';
+// API route to serve signals from crypto-scanner signals.json
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
-// Placeholder for futures-scanner.js logic
-// This will be adapted from the original futures-scanner.js
-// For now, let's create a dummy function
-async function getFuturesSignals(options: any) {
-  // Simulate fetching and processing data
-  console.log("Generating futures signals with options:", options);
-  return [
-    { symbol: 'BTC', signal: 'LONG', confidence: 85, price: 60000, timestamp: new Date().toISOString() },
-    { symbol: 'ETH', signal: 'SHORT', confidence: 70, price: 3000, timestamp: new Date().toISOString() },
-  ];
-}
-
-export async function POST(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json();
-    const signals = await getFuturesSignals(body);
-    return NextResponse.json({ ok: true, signals });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    // Path to the crypto-scanner signals.json file
+    const signalsPath = path.join('/Users/radityakusuma/Documents/crypto-scanner', 'signals.json');
+    
+    // Check if file exists
+    if (!fs.existsSync(signalsPath)) {
+      return NextResponse.json(
+        { error: 'Signals file not found' },
+        { status: 404 }
+      );
+    }
+
+    // Read and parse the signals file
+    const data = fs.readFileSync(signalsPath, 'utf-8');
+    const signals = JSON.parse(data);
+
+    // Filter signals from last 24 hours only
+    const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recentSignals = signals.filter((signal: any) => 
+      new Date(signal.timestamp).getTime() > twentyFourHoursAgo
+    );
+
+    // Limit to top 50 signals by confidence
+    const topSignals = recentSignals
+      .sort((a: any, b: any) => b.confidence - a.confidence)
+      .slice(0, 50);
+
+    return NextResponse.json(topSignals);
+
+  } catch (error) {
+    console.error('Error reading signals file:', error);
+    return NextResponse.json(
+      { error: 'Failed to read signals data' },
+      { status: 500 }
+    );
   }
 }

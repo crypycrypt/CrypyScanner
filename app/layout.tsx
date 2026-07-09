@@ -1,28 +1,25 @@
 import '../styles/globals.css'
 import { ReactNode } from 'react'
+import { Inter, Press_Start_2P } from 'next/font/google'
 import Navbar from '../components/Navbar'
 
-export const metadata = {
-  title: 'WhaleRadar AI',
-  description: 'AI-powered Web3 analytics platform'
-}
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
+const pressStart = Press_Start_2P({ weight: '400', subsets: ['latin'], variable: '--font-game', display: 'swap' })
+
+export const metadata = { title: 'WhaleRadar AI', description: 'AI-powered crypto analytics' }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,600;0,800;1,400&family=Press+Start+2P&display=swap" rel="stylesheet" />
-      </head>
-  <body className="bg-[#05060a] text-white antialiased font-ui">
-          <div className="min-h-screen bg-gradient-to-b from-[#020214] to-[#071025]">
-            <Navbar />
-            <main className="max-w-6xl mx-auto px-6 py-6">
-              {children}
-            </main>
-          </div>
+    <html lang="en" className={`${inter.variable} ${pressStart.variable}`}>
+      <body className="bg-[#0b1220] text-white antialiased font-ui min-h-screen">
+        <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#0f172a]">
+          <Navbar />
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   )
 }
+

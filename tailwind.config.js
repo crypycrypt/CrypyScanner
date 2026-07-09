@@ -1,22 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './app/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './pages/**/*.{ts,tsx}'
+    './app/**/*.{ts,tsx,js,jsx}',
+    './components/**/*.{ts,tsx,js,jsx}',
+    './lib/**/*.{ts,tsx,js,jsx}',
+    './pages/**/*.{ts,tsx,js,jsx}',
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         neon: '#00f0ff',
-        emerald: '#00D084',
-        glass: 'rgba(255,255,255,0.06)'
+        // do NOT override built-in emerald — use custom name instead
+        brand: '#00D084',
+      },
+      fontFamily: {
+        game: ['var(--font-game)', 'monospace'],
+        ui:   ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       backdropBlur: {
-        xs: '2px'
-      }
-    }
+        xs: '2px',
+      },
+    },
   },
   plugins: [],
 }

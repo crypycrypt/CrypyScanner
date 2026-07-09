@@ -1,10 +1,19 @@
 "use client"
 import AnimatedCard from '../ui/AnimatedCard'
 import Skeleton from '../ui/Skeleton'
-import { useAISignals } from '../../lib/mockHooks'
+import { useSignalBotRealTime } from '../../lib/useSignalBotRealTime'
 
 export default function AISignalsWidget(){
-  const { data, isLoading } = useAISignals() as any
+  const { data: signals, isLoading } = useSignalBotRealTime() as any
+  
+  // Transform signal bot data to AI signals format
+  const data = signals ? signals.slice(0, 3).map((signal: any, index: number) => ({
+    id: `ai-${index}`,
+    type: signal.signal === 'LONG' ? 'BUY' : signal.signal === 'SHORT' ? 'SELL' : 'WATCH',
+    token: signal.coinSymbol.toUpperCase(),
+    confidence: signal.confidence,
+    reason: signal.signalReason
+  })) : []
   return (
     <AnimatedCard>
       <h3 className="font-semibold mb-2">AI Signals</h3>
