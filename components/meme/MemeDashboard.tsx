@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { usePaperTrader } from '../../lib/usePaperTrader'
 import type { AutoPosition, AutoTraderState } from '../../lib/useAutoTrader'
 import type { BrutalSignal, PendingOrder } from '../../lib/brutalEngine'
@@ -171,6 +172,7 @@ export default function MemeDashboard() {
   return <main className="cc-floor-app">
     <section className="cc-profile"><div className="cc-cover"><span>AUTONOMOUS PAPER TRADING · MONITORING TERMINAL</span><time className="cc-cover-clock">{clock}</time></div><div className="cc-profile-content"><div className="cc-avatar"><img src="/assets/ic_icon.png" alt="CrypyCrypt" /></div><div><h1>CrypyCrypt</h1><p>scanner · narrative · wallet intelligence · risk · structure · execution</p></div><div className="cc-profile-kpis"><Kpi label="SALDO" value={`$${balance.toFixed(2)}`} good={balance >= capital} /><Kpi label="SESSION PNL" value={usd(state?.dailyPnl || 0)} good={(state?.dailyPnl || 0) >= 0} /><Kpi label="BOT" value={state?.circuitBreaker ? 'SAFETY STOP' : state?.running ? 'HUNTING' : 'PAUSED'} good={!!state?.running} /></div><div className="cc-controls">{state?.circuitBreaker ? <button onClick={() => runAction('reset')}>RESET</button> : state?.running ? <button onClick={() => runAction('stop')}>PAUSE</button> : <button className="primary" onClick={() => runAction('start')}>{acting ? 'STARTING…' : 'START PAPER'}</button>}<button onClick={() => runAction('close-all')} disabled={!positions.length}>CLOSE ALL</button></div></div></section>
     <WalletStrip balance={balance} equity={equityNow} capital={capital} usedMargin={usedMargin} freeMargin={freeMargin} realized={realized} unrealized={unrealized} totalPnl={pnl} returnPct={returnPct} bySource={bySource} openCount={positions.length} />
+    <PnlChart history={history} />
     <section className="cc-metric-grid"><Kpi label="SALDO (KAS)" value={`$${balance.toFixed(2)}`} good={balance >= capital} /><Kpi label="EQUITY" value={`$${equityNow.toFixed(2)}`} good={equityNow >= capital} /><Kpi label="TOTAL PNL" value={`${usd(pnl)} · ${returnPct >= 0 ? '+' : ''}${returnPct.toFixed(1)}%`} good={pnl >= 0} /><Kpi label="MARGIN TERPAKAI" value={`$${usedMargin.toFixed(2)}`} warn={usedMargin > 0} /><Kpi label="WIN RATE" value={`${winRate.toFixed(1)}%`} /><Kpi label="DRAWDOWN" value={`${(state?.drawdownPct ?? 0).toFixed(1)}%`} good /></section>
     <BrutalPanel state={state} acting={acting} onToggle={() => runAction(state?.brutalMode === false ? 'brutal-on' : 'brutal-off')} />
     <div className="cc-main-grid"><section className="cc-panel"><PanelTitle title="AI AGENTS · MARKET HUNTING FLOOR" pill={gate ? '5/5 PASSED · READY' : !activeCoin ? 'PAPER BOT PAUSED' : `STEP ${Math.min(stage + 1, 5)}/5 · ${agentMeta[Math.min(stage, 4)][0]}`} /><div className="cc-stage">
@@ -184,7 +186,7 @@ export default function MemeDashboard() {
           Lihat catatan reposisi di styles/meme-terminal.css. */}
       <div className="cc-stage-grid" /><svg className="cc-wires" viewBox="0 0 1000 650" preserveAspectRatio="none"><path d="M138 445 Q290 432 440 320" /><path d="M365 90 Q415 220 440 320" /><path d="M610 145 Q550 245 440 320" /><path d="M605 500 Q515 405 440 320" /><path d="M365 510 Q405 415 440 320" /> <path className={gate ? 'hot' : ''} d="M440 320 Q650 300 810 360" /></svg>
       <div className="cc-queue"><div><b>LIVE {openSignals.length ? 'SIGNAL' : 'SCAN'} QUEUE</b><span>{queue.length} FOUND{heldCount ? ` · ${heldCount} SKIP (IN POSITION)` : ''}{(state as any)?.marketRegime ? ` · REGIME ${(state as any).marketRegime}` : ''}</span></div>{queue.map((item, i) => <div className={`cc-queue-item ${i === 0 ? 'active' : ''}`} key={item.id}><b>${item.symbol}</b><span>{item.detail}</span><em>{item.score}</em></div>)}{!queue.length && <small>{heldCount ? `Semua ${heldCount} sinyal live sudah jadi posisi · menunggu scan berikutnya…` : 'Scanning Binance + DexScreener live feed…'}</small>}</div>
-      <div className="cc-whale-queue"><b>🐋 WHALE PRIORITY</b><span>{whaleAlerts.filter(alert => !alert.demo).length} LIVE</span>{whaleAlerts.slice(0, 3).map(alert => <div key={alert.id} className={alert.demo ? 'demo' : ''}><strong>${alert.symbol}</strong><small>{alert.direction.replace(/_/g, ' ').toLowerCase()}</small><em>{alert.demo ? 'DEMO' : alert.subtype.replace(/_/g, ' ')}</em></div>)}{!whaleAlerts.length && <small>Waiting for whale feed…</small>}</div>
+      <div className="cc-whale-queue"><b>WHALE PRIORITY</b><span>{whaleAlerts.filter(alert => !alert.demo).length} LIVE</span>{whaleAlerts.slice(0, 3).map(alert => <div key={alert.id} className={alert.demo ? 'demo' : ''}><strong>${alert.symbol}</strong><small>{alert.direction.replace(/_/g, ' ').toLowerCase()}</small><em>{alert.demo ? 'DEMO' : alert.subtype.replace(/_/g, ' ')}</em></div>)}{!whaleAlerts.length && <small>Waiting for whale feed…</small>}</div>
       <div className="cc-route"><b>{candidate ? `$${candidate.coinSymbol}` : queue[0] ? `$${queue[0].symbol}` : 'WAITING'}</b> · {candidate ? `sequential pipeline · step ${Math.min(stage + 1, 5)}/5 ${agentMeta[Math.min(stage, 4)][0]}` : queue.length ? 'step 1/5 · SCANNER discovery in progress' : 'awaiting dynamic candidates'}</div>
       {agentMeta.map(([name, description, color], ai) => {
         const d = getDecision(name)
@@ -264,6 +266,51 @@ function WalletStrip({ balance, equity, capital, usedMargin, freeMargin, realize
       }) : <div className="cc-wallet-row empty"><b>BELUM ADA HASIL</b><span>Start Paper — tiap entry mengunci margin dari saldo ini, tiap close mengembalikannya plus PnL.</span><em>{usd(0)}</em></div>}
     </div>
     <div className="cc-wallet-note">Margin terpakai ${usedMargin.toFixed(2)} dari saldo ${balance.toFixed(2)} · bebas ${freeMargin.toFixed(2)} · {openCount} posisi terbuka. Rugi dibatasi sebesar margin (isolated) sehingga sisa saldo tetap aman.</div>
+  </section>
+}
+// Kurva PnL kumulatif — dijumlahkan dari `recentTrades` yang sudah closed
+// (urutan asli terbaru-dulu, jadi di-reverse dulu supaya X axis kronologis).
+function PnlChart({ history }: { history: Array<{ pnlUsd: number; closedAt?: string }> }) {
+  const data = useMemo(() => {
+    const chronological = [...history].reverse()
+    let cum = 0
+    const points = chronological.map((t, i) => {
+      cum += t.pnlUsd || 0
+      return { label: `#${i + 1}`, pnl: Number(cum.toFixed(2)) }
+    })
+    return [{ label: 'Start', pnl: 0 }, ...points]
+  }, [history])
+  const latest = data[data.length - 1]?.pnl ?? 0
+  const color = latest >= 0 ? '#28e994' : '#ff586b'
+  return <section className="cc-panel cc-pnl">
+    <PanelTitle title="EQUITY / PNL CURVE" pill={`${history.length} TRADES · ${usd(latest)} KUMULATIF`} />
+    <div className="cc-pnl-body">
+      {data.length <= 1 ? (
+        <div className="cc-empty">Belum ada trade yang ditutup.<br />Kurva PnL muncul otomatis setelah posisi pertama close (SL / TP / trailing / likuidasi / manual).</div>
+      ) : (
+        <ResponsiveContainer width="100%" height={220}>
+          <AreaChart data={data} margin={{ top: 8, right: 16, left: -8, bottom: 0 }}>
+            <defs>
+              <linearGradient id="cc-pnl-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={color} stopOpacity={0.35} />
+                <stop offset="95%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#123a2b" vertical={false} />
+            <XAxis dataKey="label" tick={{ fill: '#668078', fontSize: 10 }} axisLine={{ stroke: '#123a2b' }} tickLine={false} interval="preserveStartEnd" />
+            <YAxis tick={{ fill: '#668078', fontSize: 10 }} axisLine={{ stroke: '#123a2b' }} tickLine={false} tickFormatter={(v) => `$${v}`} width={60} />
+            <ReferenceLine y={0} stroke="#3a544c" strokeDasharray="4 4" />
+            <Tooltip
+              contentStyle={{ background: '#06140e', border: '1px solid #123a2b', borderRadius: 8, fontSize: 11 }}
+              labelStyle={{ color: '#668078' }}
+              itemStyle={{ color }}
+              formatter={(value: number) => [usd(value), 'Cumulative PnL']}
+            />
+            <Area type="monotone" dataKey="pnl" stroke={color} strokeWidth={2} fill="url(#cc-pnl-gradient)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
+    </div>
   </section>
 }
 

@@ -51,7 +51,7 @@ export default function Features(){
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <ParallaxCard key={item.title} artwork="/assets/ic_aurora.svg" className="p-6 rounded-xl hover:border-[rgba(0,240,255,0.3)] transition-all group">
+          <ParallaxCard key={item.title} artwork="/assets/ic_aurora%20copy.svg" className="p-6 rounded-xl hover:border-[rgba(0,240,255,0.3)] transition-all group">
             <div className="flex items-start gap-4">
               <span className="text-3xl">{item.icon}</span>
               <div className="flex-1">

@@ -1195,7 +1195,16 @@ export async function runLiveStockScan(market: StockMarket): Promise<StockScanRe
   watchlist.sort((a, b) => Math.abs(b.bullish - 50) - Math.abs(a.bullish - 50))
   const trimmedWatchlist = watchlist.slice(0, CONFIG.MAX_WATCHLIST)
   log(`SELESAI · ${analyzed} saham dianalisis → ${trimmed.length} sinyal lolos semua gate (13 engines + Bayesian + Kelly + HTF + regime + sniper) · ${trimmedWatchlist.length} near-miss masuk watchlist`)
-  void dispatchStockAlerts(trimmed, market)
+
+  // Jangan kirim alert Telegram kalau bursa lagi tutup — sinyal dari candle
+  // harian tetap valid untuk ditampilkan di UI, tapi belum bisa dieksekusi
+  // sampai sesi berikutnya buka, jadi alert malam/weekend cuma jadi noise.
+  const marketOpen = getMarketSessions(market).some(s => s.open)
+  if (marketOpen) {
+    void dispatchStockAlerts(trimmed, market)
+  } else {
+    log(`ALERT · dilewati, bursa ${market} sedang tutup (di luar jam sesi perdagangan)`)
+  }
 
   const report: StockScanReport = {
     scannedAt: new Date(startedAt).toISOString(),

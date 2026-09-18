@@ -58,7 +58,7 @@ export default function HollowcatTradeQuality({ analysis }: Props) {
 
       {/* Factor Breakdown */}
       <div className="card-glass rounded-xl p-5">
-        <h3 className="text-sm font-bold text-slate-300 mb-4">📊 Factor Breakdown</h3>
+        <h3 className="text-sm font-bold text-slate-300 mb-4">Factor Breakdown</h3>
         <div className="space-y-3">
           {Object.entries(d.quality.factors)
             .sort((a: any, b: any) => b[1] - a[1])
@@ -104,7 +104,7 @@ export default function HollowcatTradeQuality({ analysis }: Props) {
 
       {/* Rating Scale */}
       <div className="card-glass rounded-xl p-5">
-        <h3 className="text-sm font-bold text-slate-300 mb-3">📏 Rating Scale</h3>
+        <h3 className="text-sm font-bold text-slate-300 mb-3">Rating Scale</h3>
         <div className="space-y-2 text-xs">
           {[
             { rating: 'A+', desc: 'Exceptional - all factors aligned', color: '#4ade80' },

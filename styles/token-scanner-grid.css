@@ -150,6 +150,10 @@
   cursor: pointer; text-decoration: none; transition: all 0.15s;
 }
 .tsg-action-btn:hover { background: rgba(0, 240, 255, 0.18); }
+.tsg-action-btn.active { background: rgba(0, 240, 255, 0.28); border-color: rgba(0, 240, 255, 0.55); }
+
+.tsg-analysis-panel { margin-top: 16px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0, 240, 255, 0.15); background: #0b1220; }
+.tsg-analysis-header { padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
 .tsg-empty, .tsg-loading { text-align: center; padding: 32px; color: #475569; font-size: 0.8rem; }
 
@@ -161,6 +165,10 @@
 .tsg-page-btn:disabled { opacity: 0.4; cursor: default; }
 .tsg-page-btn:not(:disabled):hover { color: #e2e8f0; border-color: rgba(255, 255, 255, 0.3); }
 .tsg-page-info { font-size: 0.72rem; color: #64748b; }
+.tsg-page-numbers { display: flex; align-items: center; gap: 5px; }
+.tsg-page-num { min-width: 30px; padding: 5px 8px; }
+.tsg-page-num.active { background: rgba(0, 240, 255, 0.15); border-color: var(--neon, #00f0ff); color: #7dfaff; cursor: default; }
+.tsg-page-ellipsis { color: #475569; font-size: 0.72rem; padding: 0 2px; }
 
 @media (max-width: 700px) {
   .tsg-search-input { width: 130px; }

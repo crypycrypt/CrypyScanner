@@ -94,7 +94,7 @@ export function MoonPhasePanel({ coin }: { coin: CoinAnalysis }) {
 
       {/* How moon factors into AI score */}
       <div className="card-glass rounded-xl p-4 border border-[rgba(99,102,241,0.2)]">
-        <div className="font-semibold text-sm text-indigo-300 mb-2">🤖 Bagaimana Moon Phase masuk ke AI Score?</div>
+        <div className="font-semibold text-sm text-indigo-300 mb-2">Bagaimana Moon Phase masuk ke AI Score?</div>
         <p className="text-xs text-slate-300 leading-relaxed">
           AI Score <strong>{coin.name}</strong> ({coin.symbol}) dibangun dari <strong>6 faktor teknikal</strong> (Momentum 24h, Trend 7D, Likuiditas, MCap Rank, RSI, Futures Signal). Moon Phase ditambahkan sebagai faktor ke-7 — sebuah <em>sentiment modifier</em> berbasis korelasi historis siklus lunar. Nilainya ditambahkan langsung ke skor: fase bullish ({'🌔'} +5, {'🌒'} +3) menaikkan skor, fase exhaustion ({'🌕'} -8) menurunkannya.
         </p>
@@ -352,9 +352,9 @@ export function IndicatorGuidePanel({ coin }: { coin: CoinAnalysis }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        {card('📏 MA (Moving Average)', 'MA20 = (P₁ + P₂ + … + P₂₀) ÷ 20', 'Rata-rata harga sederhana 20 hari terakhir. Bertindak sebagai support/resistance dinamis.', byId('ma20'))}
+        {card('MA (Moving Average)', 'MA20 = (P₁ + P₂ + … + P₂₀) ÷ 20', 'Rata-rata harga sederhana 20 hari terakhir. Bertindak sebagai support/resistance dinamis.', byId('ma20'))}
         {card('⚡ EMA (Exponential MA)', 'EMAₜ = Pₜ × k + EMAₜ₋₁ × (1−k) · k = 2÷(n+1)', 'Seperti MA tapi memberi bobot lebih pada harga terbaru. Lebih reaktif terhadap perubahan harga.', byId('ema20').concat(byId('ema20v50')))}
-        {card('📊 MACD (Momentum)', 'MACD = EMA12 − EMA26 · Signal = EMA9(MACD) · Hist = MACD − Signal', 'Mengukur kekuatan dan arah momentum. Histogram positif = momentum naik.', byId('macd').concat(byId('hist')))}
+        {card('MACD (Momentum)', 'MACD = EMA12 − EMA26 · Signal = EMA9(MACD) · Hist = MACD − Signal', 'Mengukur kekuatan dan arah momentum. Histogram positif = momentum naik.', byId('macd').concat(byId('hist')))}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -432,7 +432,7 @@ export function AIScorePanel({ coin }: { coin: CoinAnalysis }) {
 
       {/* Factor breakdown */}
       <div className="card-glass rounded-xl p-4">
-        <div className="text-xs uppercase tracking-wider text-slate-400 mb-3">📊 Breakdown 7 Faktor</div>
+        <div className="text-xs uppercase tracking-wider text-slate-400 mb-3">Breakdown 7 Faktor</div>
         <div className="space-y-3">
           {coin.factors.map((f, i) => {
             const pct = Math.min(100, (Math.abs(f.value) / f.max) * 100)

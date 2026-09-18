@@ -94,7 +94,7 @@ export default function HollowcatDashboard({ analysis }: Props) {
 
         {/* FVG Panel */}
         <div className="card-glass rounded-xl p-5">
-          <h3 className="text-sm font-bold text-slate-300 mb-3">📐 Fair Value Gaps</h3>
+          <h3 className="text-sm font-bold text-slate-300 mb-3">Fair Value Gaps</h3>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between"><span className="text-slate-400">Total FVGs</span><span className="font-semibold">{d.fvg.zones.length}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">Fresh Bullish</span><span className="font-semibold text-green-400">{d.fvg.freshBullish.length}</span></div>
@@ -120,7 +120,7 @@ export default function HollowcatDashboard({ analysis }: Props) {
 
         {/* Volume Panel */}
         <div className="card-glass rounded-xl p-5">
-          <h3 className="text-sm font-bold text-slate-300 mb-3">📊 Volume</h3>
+          <h3 className="text-sm font-bold text-slate-300 mb-3">Volume</h3>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between"><span className="text-slate-400">Spike</span><span className={`font-semibold ${d.volume.spike ? 'text-green-400' : 'text-slate-400'}`}>{d.volume.spike ? 'YES' : 'NO'}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">Relative Vol</span><span className="font-semibold">{d.volume.relativeVolume.toFixed(2)}x</span></div>
@@ -132,7 +132,7 @@ export default function HollowcatDashboard({ analysis }: Props) {
 
         {/* Regression Panel */}
         <div className="card-glass rounded-xl p-5">
-          <h3 className="text-sm font-bold text-slate-300 mb-3">📉 Regression</h3>
+          <h3 className="text-sm font-bold text-slate-300 mb-3">Regression</h3>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between"><span className="text-slate-400">Direction</span><span className="font-semibold">{d.regression.projectedDirection}</span></div>
             <div className="flex justify-between"><span className="text-slate-400">Slope</span><span className="font-mono">{d.regression.slope.toFixed(6)}</span></div>
@@ -163,7 +163,7 @@ export default function HollowcatDashboard({ analysis }: Props) {
 
        {/* RSI Momentum Divergence Panel */}
        <div className="card-glass rounded-xl p-5">
-         <h3 className="text-sm font-bold text-slate-300 mb-3">📊 RSI Momentum Divergence</h3>
+         <h3 className="text-sm font-bold text-slate-300 mb-3">RSI Momentum Divergence</h3>
          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
            <div>
              <div className="text-xs text-slate-400 mb-1">RSI Value</div>

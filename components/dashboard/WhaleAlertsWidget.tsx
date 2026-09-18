@@ -78,7 +78,7 @@ export default function WhaleAlertsWidget() {
 
       <div className="wa-header">
         <h2>
-          🐋 Whale Accumulation Radar
+          Whale Accumulation Radar
           <span className="wa-live-dot" />
           <span className="wa-live-label">LIVE</span>
         </h2>
@@ -112,7 +112,7 @@ export default function WhaleAlertsWidget() {
         {/* Alert filter/action header */}
         <div className="wa-alert-header">
           <div className="wa-alert-title">
-            🦅 Whale Alert Signals
+            Whale Alert Signals
             <span className="wa-alert-status">
               {isLoading ? 'Scanning…' : `${alerts.length} signals · ${buyCount}↑ ${sellCount}↓ ${watchCount}~`}
             </span>

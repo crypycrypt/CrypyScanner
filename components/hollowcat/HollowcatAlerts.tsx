@@ -26,7 +26,7 @@ export default function HollowcatAlerts({ analysis }: Props) {
   <div className="space-y-6">
     {/* Alert Status */}
     <div className="card-glass rounded-xl p-5">
-      <h3 className="text-sm font-bold text-slate-300 mb-4">🔔 Alert Status</h3>
+      <h3 className="text-sm font-bold text-slate-300 mb-4">Alert Status</h3>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="text-center p-3 rounded-lg bg-[rgba(255,255,255,0.03)]">

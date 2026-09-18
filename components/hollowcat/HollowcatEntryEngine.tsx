@@ -52,7 +52,7 @@ export default function HollowcatEntryEngine({ analysis }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Entry Parameters */}
         <div className="card-glass rounded-xl p-5">
-          <h3 className="text-sm font-bold text-slate-300 mb-4">🚀 Entry Parameters</h3>
+          <h3 className="text-sm font-bold text-slate-300 mb-4">Entry Parameters</h3>
           <div className="space-y-3 text-xs">
             <div className="flex justify-between">
               <span className="text-slate-400">Entry Price</span>
@@ -91,7 +91,7 @@ export default function HollowcatEntryEngine({ analysis }: Props) {
 
         {/* Trade Quality */}
         <div className="card-glass rounded-xl p-5">
-          <h3 className="text-sm font-bold text-slate-300 mb-4">⭐ Trade Quality</h3>
+          <h3 className="text-sm font-bold text-slate-300 mb-4">Trade Quality</h3>
           <div className="space-y-3 text-xs">
             <div className="flex justify-between items-center">
               <span className="text-slate-400">Rating</span>
@@ -140,7 +140,7 @@ export default function HollowcatEntryEngine({ analysis }: Props) {
       {/* RSI Divergence Alert */}
       {(rsiDiv?.bullishDivergences.length > 0 || rsiDiv?.bearishDivergences.length > 0) && (
         <div className="card-glass rounded-xl p-5 border-l-4 border-indigo-500">
-          <h3 className="text-sm font-bold text-slate-300 mb-3">📊 RSI Momentum Divergence Alert</h3>
+          <h3 className="text-sm font-bold text-slate-300 mb-3">RSI Momentum Divergence Alert</h3>
           <div className="space-y-2 text-xs">
             {rsiDiv.bullishDivergences.map((div: any, i: number) => (
               <div key={`bull-${i}`} className="flex items-start gap-2 text-green-300">

@@ -68,7 +68,7 @@ export default function SignalBotWidget() {
   return (
     <div className="card-glass rounded-xl p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">🤖 Signal Bot</h3>
+        <h3 className="text-lg font-semibold">Signal Bot</h3>
         <div className="flex gap-1 border border-[rgba(255,255,255,0.1)] rounded-lg p-1">
           {STATUS_TABS.map(tab => (
             <button 

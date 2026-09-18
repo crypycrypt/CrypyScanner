@@ -627,7 +627,7 @@ export default function WalletFlowGraph({ coin }: WalletFlowGraphProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Top Accumulators */}
         <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700/30">
-          <div className="text-xs font-semibold text-green-400 mb-3 uppercase tracking-wider">🐋 Top Accumulators</div>
+          <div className="text-xs font-semibold text-green-400 mb-3 uppercase tracking-wider">Top Accumulators</div>
           <div className="space-y-2">
             {data.stats.topAccumulators.map((acc, i) => (
               <div key={acc.id} className="flex items-center justify-between">

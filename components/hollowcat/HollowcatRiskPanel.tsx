@@ -14,7 +14,7 @@ export default function HollowcatRiskPanel({ analysis }: Props) {
     <div className="space-y-6">
       {/* Risk Levels */}
       <div className="card-glass rounded-xl p-5">
-        <h3 className="text-sm font-bold text-slate-300 mb-4">🛡️ Risk Management</h3>
+        <h3 className="text-sm font-bold text-slate-300 mb-4">Risk Management</h3>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 rounded-lg bg-[rgba(255,255,255,0.03)]">
@@ -62,7 +62,7 @@ export default function HollowcatRiskPanel({ analysis }: Props) {
 
       {/* Risk/Reward Visualization */}
       <div className="card-glass rounded-xl p-5">
-        <h3 className="text-sm font-bold text-slate-300 mb-3">📐 Risk/Reward Visualization</h3>
+        <h3 className="text-sm font-bold text-slate-300 mb-3">Risk/Reward Visualization</h3>
         <div className="h-40 bg-[rgba(0,0,0,0.3)] rounded-lg border border-[rgba(148,163,184,0.1)] flex items-end justify-center gap-8 p-4">
           {/* Risk bar */}
           <div className="flex flex-col items-center">

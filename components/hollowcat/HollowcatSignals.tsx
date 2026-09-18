@@ -16,7 +16,7 @@ export default function HollowcatSignals({ analysis }: Props) {
       {/* Signal Overview */}
       <div className="card-glass rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-slate-300">🎯 Signal Overview</h3>
+          <h3 className="text-sm font-bold text-slate-300">Signal Overview</h3>
           <span className={`text-lg font-bold ${
             d.entry.signal === 'LONG' ? 'text-green-400' :
             d.entry.signal === 'SHORT' ? 'text-red-400' :
@@ -81,7 +81,7 @@ export default function HollowcatSignals({ analysis }: Props) {
 
       {/* Probability Scores */}
       <div className="card-glass rounded-xl p-5">
-        <h3 className="text-sm font-bold text-slate-300 mb-3">📊 Probability Scores</h3>
+        <h3 className="text-sm font-bold text-slate-300 mb-3">Probability Scores</h3>
         <div className="grid grid-cols-5 gap-3">
           {[
             { label: 'Trend', value: d.probability.scores.trend, weight: '20%', color: '#60a5fa' },
@@ -126,7 +126,7 @@ export default function HollowcatSignals({ analysis }: Props) {
 
       {/* RSI Divergence Panel */}
        <div className="card-glass rounded-xl p-5">
-         <h3 className="text-sm font-bold text-slate-300 mb-3">📊 RSI Momentum Divergence</h3>
+         <h3 className="text-sm font-bold text-slate-300 mb-3">RSI Momentum Divergence</h3>
          <div className="grid grid-cols-3 gap-3">
            <div className="text-center">
              <div className="text-xs text-slate-400 mb-1">RSI Value</div>

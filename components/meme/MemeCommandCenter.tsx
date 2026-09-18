@@ -1,11 +1,13 @@
 "use client"
 
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, FormEvent } from 'react'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { MemeToken, MemeWallet } from '../../lib/meme/types'
 import { scanMemeToken, estimateAlertFromToken } from '../../lib/memeScanner'
 import { usePaperTrader } from '../../lib/usePaperTrader'
 import CoinIcon from '../ui/CoinIcon'
+import RadarShowcaseCard from './RadarShowcaseCard'
 
 // ══════════════════════════════════════════════════════════════════
 // MEME COMMAND CENTER
@@ -540,10 +542,198 @@ function CoinSearch({ onSelect }: { onSelect: (t: MemeToken) => void }) {
   )
 }
 
+// SOL price card with a live-accumulated curve — same visual language as
+// Dashboard's "EQUITY / PNL CURVE" (area chart, gradient fill, green/red by
+// trend), but fed by the SOL price already flowing through this page's own
+// polling instead of a new external history fetch.
+function SolPriceChart({ solUsd, history }: { solUsd: number; history: { t: number; price: number }[] }) {
+  // Sebelum ada ≥2 titik nyata, gambar garis datar di harga saat ini (bukan
+  // placeholder teks) — tetap jujur (nilainya harga real, cuma diulang jadi
+  // 2 titik biar ada garis) dan terasa seperti chart yang benar-benar hidup,
+  // bukan kotak kosong menunggu data.
+  const hasRealCurve = history.length > 1
+  const points = hasRealCurve || !solUsd
+    ? history
+    : history.length === 1
+      ? [{ t: history[0].t - 60_000, price: history[0].price }, history[0]]
+      : [{ t: Date.now() - 60_000, price: solUsd }, { t: Date.now(), price: solUsd }]
+  const data = points.map((p) => ({
+    label: new Date(p.t).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+    price: p.price,
+  }))
+  const first = points[0]?.price ?? solUsd
+  const last = points[points.length - 1]?.price ?? solUsd
+  const color = last >= first ? '#22e58a' : '#ff5d69'
+  const prices = points.map((p) => p.price)
+  const domain: [number, number] | undefined = prices.length
+    ? [Math.min(...prices) * 0.999 || 0, (Math.max(...prices) * 1.001) || 1]
+    : undefined
+
+  return (
+    <div className="meme-cc-kpi meme-cc-kpi-chart">
+      <div className="meme-cc-kpi-chart-head">
+        <div>
+          <label>SOL PRICE · BASIS KURVA</label>
+          <b className="good">{solUsd ? `$${solUsd.toFixed(2)}` : '—'}</b>
+        </div>
+        <span className="meme-cc-kpi-chart-hint">{hasRealCurve ? `${history.length} titik · live` : 'Mengumpulkan data…'}</span>
+      </div>
+      {data.length > 1 ? (
+        <ResponsiveContainer width="100%" height={90}>
+          <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="meme-sol-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={color} stopOpacity={0.35} />
+                <stop offset="95%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="label" hide />
+            <YAxis domain={domain} hide />
+            <Tooltip
+              contentStyle={{ background: '#06140e', border: '1px solid #123a2b', borderRadius: 8, fontSize: 11 }}
+              labelStyle={{ color: '#648176' }}
+              itemStyle={{ color }}
+              formatter={(value: number) => [`$${value.toFixed(2)}`, 'SOL']}
+            />
+            <Area type="monotone" dataKey="price" stroke={color} strokeWidth={2} fill="url(#meme-sol-gradient)" isAnimationActive={hasRealCurve} />
+          </AreaChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="meme-cc-kpi-chart-empty">Menunggu harga SOL pertama…</div>
+      )}
+    </div>
+  )
+}
+
+// Balance card — baca native SOL balance dari address publik yang di-input
+// user (bukan wallet-connect/signing), lalu dinilai dalam USD pakai harga SOL
+// yang sama. Kurvanya "nilai portofolio" (bukan realized PNL — itu butuh
+// menelusuri seluruh histori transaksi on-chain, di luar cakupan saat ini),
+// diakumulasi live persis seperti SolPriceChart.
+function WalletBalanceCard() {
+  const [address, setAddress] = useState('DM3my1HYwmkSRLp9FduCmgRAR9Wv7CUEf5UZvU8taZhi')
+  const [inputValue, setInputValue] = useState(address)
+  const [history, setHistory] = useState<{ t: number; value: number }[]>([])
+
+  const isValid = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['wallet-balance', address],
+    queryFn: async () => {
+      const res = await fetch(`/api/wallet-balance?address=${encodeURIComponent(address)}`)
+      const json = await res.json()
+      if (!res.ok || json.ok === false) throw new Error(json.error || 'Gagal membaca balance')
+      return json as { solBalance: number; solPriceUsd: number; balanceUsd: number }
+    },
+    enabled: isValid,
+    refetchInterval: 20_000,
+    retry: 1,
+  })
+
+  useEffect(() => {
+    setHistory([])
+  }, [address])
+
+  useEffect(() => {
+    if (!data || !(data.balanceUsd >= 0)) return
+    setHistory((prev) => {
+      if (prev.length && prev[prev.length - 1].value === data.balanceUsd) return prev
+      const next = [...prev, { t: Date.now(), value: data.balanceUsd }]
+      return next.length > 60 ? next.slice(next.length - 60) : next
+    })
+  }, [data])
+
+  const hasRealCurve = history.length > 1
+  const points = hasRealCurve
+    ? history
+    : history.length === 1
+      ? [{ t: history[0].t - 60_000, value: history[0].value }, history[0]]
+      : data
+        ? [{ t: Date.now() - 60_000, value: data.balanceUsd }, { t: Date.now(), value: data.balanceUsd }]
+        : []
+  const chartData = points.map((p) => ({
+    label: new Date(p.t).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+    value: p.value,
+  }))
+  const first = points[0]?.value ?? 0
+  const last = points[points.length - 1]?.value ?? 0
+  const color = last >= first ? '#22e58a' : '#ff5d69'
+  const values = points.map((p) => p.value)
+  const domain: [number, number] | undefined = values.length
+    ? [(Math.min(...values) * 0.999) || 0, (Math.max(...values) * 1.001) || 1]
+    : undefined
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(inputValue.trim())) setAddress(inputValue.trim())
+  }
+
+  return (
+    <div className="meme-cc-kpi meme-cc-kpi-chart">
+      <div className="meme-cc-kpi-chart-head">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <label>BALANCE · WALLET SAYA</label>
+          <b className="good">{data ? `$${data.balanceUsd.toFixed(2)}` : isLoading ? '…' : '—'}</b>
+          {data && <span className="meme-cc-wallet-sub">{data.solBalance.toFixed(4)} SOL</span>}
+        </div>
+        <span className="meme-cc-kpi-chart-hint">{error ? 'Gagal baca wallet' : hasRealCurve ? `${history.length} titik · live` : 'Mengumpulkan data…'}</span>
+      </div>
+      <form onSubmit={handleSubmit} className="meme-cc-wallet-input-row">
+        <input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Paste alamat wallet Solana…"
+          className="meme-cc-wallet-input"
+          spellCheck={false}
+        />
+        <button type="submit" className="meme-cc-wallet-submit">Cek</button>
+      </form>
+      {chartData.length > 1 ? (
+        <ResponsiveContainer width="100%" height={70}>
+          <AreaChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="meme-wallet-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={color} stopOpacity={0.35} />
+                <stop offset="95%" stopColor={color} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="label" hide />
+            <YAxis domain={domain} hide />
+            <Tooltip
+              contentStyle={{ background: '#06140e', border: '1px solid #123a2b', borderRadius: 8, fontSize: 11 }}
+              labelStyle={{ color: '#648176' }}
+              itemStyle={{ color }}
+              formatter={(value: number) => [`$${value.toFixed(2)}`, 'Balance']}
+            />
+            <Area type="monotone" dataKey="value" stroke={color} strokeWidth={2} fill="url(#meme-wallet-gradient)" isAnimationActive={hasRealCurve} />
+          </AreaChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="meme-cc-kpi-chart-empty">
+          {!isValid ? 'Masukkan alamat wallet Solana yang valid.' : error ? String((error as Error).message) : 'Membaca balance…'}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ═══════════════════════ RADAR SECTION ═══════════════════════════
 function RadarSection({ tokens, meta, isLoading, error, onSelect, sortBy, setSortBy, narrativeFilter, setNarrativeFilter, minLiquidity, setMinLiquidity, bucketFilter, setBucketFilter, page, pageSize, total, totalPages, setPage, setPageSize, refetch }: any) {
   const counts: Record<string, number> = meta?.bucketCounts || {}
   const solUsd: number = meta?.solPriceUsd || 0
+  // Kurva SOL price — diakumulasi live dari solUsd yang sudah mengalir lewat
+  // polling /api/meme-tokens (bukan fetch histori eksternal baru), satu titik
+  // baru dicatat tiap kali harga berubah dari titik terakhir. Grafik dimulai
+  // kosong dan terisi selama tab dibuka — bukan data dummy.
+  const [solHistory, setSolHistory] = useState<{ t: number; price: number }[]>([])
+  useEffect(() => {
+    if (!(solUsd > 0)) return
+    setSolHistory((prev) => {
+      if (prev.length && prev[prev.length - 1].price === solUsd) return prev
+      const next = [...prev, { t: Date.now(), price: solUsd }]
+      return next.length > 60 ? next.slice(next.length - 60) : next
+    })
+  }, [solUsd])
   const gateMax: number = meta?.holderGateMaxPct ?? 25
   const coverage: number = meta?.holderCoverage ?? 0
   const pv = meta?.pumpFunVolume || { tokens: 0, vol5m: 0, vol24h: 0, txns5m: 0 }
@@ -617,19 +807,32 @@ function RadarSection({ tokens, meta, isLoading, error, onSelect, sortBy, setSor
   ]
   return (
     <>
-      {/* KPI strip — semua angka berasal dari API live (feed + kurva + RugCheck) */}
-      <div className="meme-cc-metric-grid">
-        <div className="meme-cc-kpi"><label>SOL PRICE · BASIS KURVA</label><b className="good">{solUsd ? `$${solUsd.toFixed(2)}` : '—'}</b></div>
-        <div className="meme-cc-kpi" title={`Volume agregat ${pv.tokens} token yang MASIH di kurva bonding pump.fun (dexId=pumpfun) · ${pv.txns5m} txns/5m`}>
-          <label>VOL PUMP.FUN · {pv.tokens} TOKEN BONDING</label>
-          <b className="lime">{formatNumber(pv.vol5m)}</b>
-          <small>5m · 24h {formatNumber(pv.vol24h)} · {pv.txns5m} txns</small>
+      {/* Kiri: kartu showcase dekoratif (pajangan saja, tanpa data live).
+          Kanan: KPI strip — semua angka berasal dari API live (feed + kurva
+          + RugCheck), bertumpuk 3 tier: SOL PRICE sendirian di atas,
+          kelompok bonding di tengah, sisanya di bawah. */}
+      <div className="meme-cc-metric-row">
+        <RadarShowcaseCard />
+        <div className="meme-cc-metric-grid">
+          <div className="meme-cc-metric-top meme-cc-metric-top-split">
+            <SolPriceChart solUsd={solUsd} history={solHistory} />
+            <WalletBalanceCard />
+          </div>
+          <div className="meme-cc-metric-mid">
+            <div className="meme-cc-kpi" title={`Volume agregat ${pv.tokens} token yang MASIH di kurva bonding pump.fun (dexId=pumpfun) · ${pv.txns5m} txns/5m`}>
+              <label>VOL PUMP.FUN · {pv.tokens} TOKEN BONDING</label>
+              <b className="lime">{formatNumber(pv.vol5m)}</b>
+              <small>5m · 24h {formatNumber(pv.vol24h)} · {pv.txns5m} txns</small>
+            </div>
+            <div className="meme-cc-kpi"><label>NEW BONDING · ≥15% & ≤$10K</label><b className="lime">{counts.NEW_BONDING || 0}</b></div>
+            <div className="meme-cc-kpi"><label>BONDING RADAR · 35–99% & ≥$10K</label><b className="good">{counts.BONDING_RADAR || 0}</b></div>
+          </div>
+          <div className="meme-cc-metric-bottom">
+            <div className="meme-cc-kpi"><label>MOMENTUM · ≥$10K + VOL GERAK</label><b className="warn">{counts.MOMENTUM || 0}</b></div>
+            <div className="meme-cc-kpi"><label>GERBANG TOP-10 HOLDER</label><b className="lime">≤ {gateMax}%</b></div>
+            <div className="meme-cc-kpi"><label>CAKUPAN DATA HOLDER</label><b>{coverage} token</b></div>
+          </div>
         </div>
-        <div className="meme-cc-kpi"><label>NEW BONDING · ≥15% & ≤$10K</label><b className="lime">{counts.NEW_BONDING || 0}</b></div>
-        <div className="meme-cc-kpi"><label>BONDING RADAR · 35–99% & ≥$10K</label><b className="good">{counts.BONDING_RADAR || 0}</b></div>
-        <div className="meme-cc-kpi"><label>MOMENTUM · ≥$10K + VOL GERAK</label><b className="warn">{counts.MOMENTUM || 0}</b></div>
-        <div className="meme-cc-kpi"><label>GERBANG TOP-10 HOLDER</label><b className="lime">≤ {gateMax}%</b></div>
-        <div className="meme-cc-kpi"><label>CAKUPAN DATA HOLDER</label><b>{coverage} token</b></div>
       </div>
 
       {/* Chip filter bucket — filter server-side, jumlah dihitung dari seluruh feed */}
@@ -1362,13 +1565,13 @@ export default function MemeCommandCenter() {
 
   const tokens: MemeToken[] = tokensQuery.data?.tokens || []
 
-  const sections: { key: Section; label: string }[] = [
-    { key: 'radar', label: 'RADAR' },
-    { key: 'sniper', label: 'SNIPER' },
-    { key: 'wallets', label: 'WALLETS' },
-    { key: 'narrative', label: 'NARRATIVE' },
-    { key: 'flow', label: 'FLOW' },
-    { key: 'risk', label: 'RISK' },
+  const sections: { key: Section; label: string; icon: string }[] = [
+    { key: 'radar', label: 'RADAR', icon: '/assets/ic_monitoring.svg' },
+    { key: 'sniper', label: 'SNIPER', icon: '/assets/ic_fingerprint.svg' },
+    { key: 'wallets', label: 'WALLETS', icon: '/assets/ic_coin.png' },
+    { key: 'narrative', label: 'NARRATIVE', icon: '/assets/ic_planet.svg' },
+    { key: 'flow', label: 'FLOW', icon: '/assets/ic_connection.svg' },
+    { key: 'risk', label: 'RISK', icon: '/assets/ic_rules.svg' },
   ]
 
   return (
@@ -1385,7 +1588,9 @@ export default function MemeCommandCenter() {
             Tidak lagi disembunyikan di layar kecil. */}
         <nav className="meme-cc-subnav">
           {sections.map(s => (
-            <button key={s.key} className={section === s.key ? 'active' : ''} onClick={() => setSection(s.key)}>{s.label}</button>
+            <button key={s.key} className={section === s.key ? 'active' : ''} onClick={() => setSection(s.key)}>
+              <img src={s.icon} alt="" />{s.label}
+            </button>
           ))}
           <div className="stats">
             <div className="stat"><label>ACTIVE EDGE</label><b className="live">+{(tokensQuery.data?.tokens || []).filter((t: any) => t.aiSignal === 'STRONG BUY' || t.aiSignal === 'CONDITIONAL BUY').length}</b></div>

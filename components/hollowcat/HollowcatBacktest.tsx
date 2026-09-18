@@ -32,7 +32,7 @@ export default function HollowcatBacktest({ analysis }: Props) {
 
       {/* Detailed Metrics */}
       <div className="card-glass rounded-xl p-5">
-        <h3 className="text-sm font-bold text-slate-300 mb-4">📊 Performance Metrics</h3>
+        <h3 className="text-sm font-bold text-slate-300 mb-4">Performance Metrics</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-3 rounded-lg bg-[rgba(255,255,255,0.03)]">
             <div className="text-xs text-slate-400">Expectancy</div>

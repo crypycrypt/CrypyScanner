@@ -1,0 +1,161 @@
+/* Radar Showcase Card — purely decorative holo trading-card, adapted from a
+   user-supplied "VOID REAPER" TCG card sample. Recolored from its original
+   indigo/purple/gold palette to this page's own green/lime terminal theme
+   (--t-g/--t-l/--t-a/--t-r already defined in meme-terminal.css) and
+   reflavored to fit WhaleRadar AI's Meme's radar branding. All classes
+   prefixed `rsc-` to avoid collisions with `.card`/`.scene` etc. elsewhere.
+   No live data — this is a static display piece next to the KPI strip. */
+
+.rsc-slot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0 0.5em 0.5em;
+}
+
+.rsc-card {
+  --glow: #22e58a;
+  --glow-alt: #baff38;
+  --gold: #ffc85b;
+  --text: #d8eee5;
+  --text-dim: #648176;
+
+  position: relative;
+  font-size: 16px;
+  width: 17.5em;
+  aspect-ratio: 2.5 / 3.5;
+  background: linear-gradient(160deg, #0d1f16 0%, #050f0a 100%);
+  border-radius: 0.8em;
+  overflow: hidden;
+  cursor: default;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.rsc-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    160deg,
+    rgba(34, 229, 138, 0.5) 0%,
+    rgba(186, 255, 56, 0.3) 30%,
+    rgba(34, 211, 238, 0.2) 60%,
+    rgba(34, 229, 138, 0.4) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.rsc-card:hover { transform: translateY(-0.6em) rotateX(4deg) rotateY(-2deg); }
+
+.rsc-holo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%, transparent 40%,
+    rgba(255, 255, 255, 0.03) 45%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 55%,
+    transparent 60%, transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: rsc-holo-move 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+@keyframes rsc-holo-move { 0%, 100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+.rsc-card:hover .rsc-holo { animation-duration: 2s; }
+
+.rsc-inner {
+  position: relative;
+  height: 100%;
+  padding: 0.7em;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+.rsc-top-bar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.35em; }
+.rsc-type {
+  font-size: 0.55em; font-weight: 600; letter-spacing: 0.2em; color: var(--glow);
+  padding: 0.3em 0.6em; border: 1px solid rgba(34, 229, 138, 0.3); border-radius: 0.2em;
+}
+
+.rsc-title {
+  margin: 0 0 0.35em; font-size: 1.05em; font-weight: 800; letter-spacing: 0.1em;
+  color: var(--text); text-align: center; text-shadow: 0 0 1.5em rgba(34, 229, 138, 0.5);
+}
+
+.rsc-portrait {
+  flex: 1; position: relative;
+  background: linear-gradient(180deg, #030a06 0%, #0a1a12 100%);
+  border-radius: 0.4em; overflow: hidden; margin-bottom: 0.35em; min-height: 4.5em;
+}
+.rsc-portal {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 5em; height: 5em; border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 229, 138, 0.3) 0%, transparent 70%);
+  box-shadow: 0 0 2em rgba(34, 229, 138, 0.4), inset 0 0 2em rgba(186, 255, 56, 0.3);
+  animation: rsc-portal-pulse 3s ease-in-out infinite;
+}
+@keyframes rsc-portal-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+.rsc-mascot {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68%;
+  height: auto;
+  filter: drop-shadow(0 0 0.6em rgba(34, 229, 138, 0.35));
+  animation: rsc-mascot-float 4s ease-in-out infinite;
+}
+@keyframes rsc-mascot-float { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-0.35em); } }
+.rsc-souls { position: absolute; inset: 0; pointer-events: none; }
+.rsc-souls i {
+  position: absolute; width: 0.28em; height: 0.28em; background: var(--glow-alt); border-radius: 50%;
+  opacity: 0.6; box-shadow: 0 0 0.4em var(--glow-alt); animation: rsc-soul-float 4s ease-in-out infinite; font-style: normal;
+}
+.rsc-souls i:nth-child(1) { top: 60%; left: 20%; animation-delay: 0s; }
+.rsc-souls i:nth-child(2) { top: 70%; left: 75%; animation-delay: 0.8s; }
+.rsc-souls i:nth-child(3) { top: 40%; left: 15%; animation-delay: 1.6s; }
+.rsc-souls i:nth-child(4) { top: 55%; left: 80%; animation-delay: 2.4s; }
+.rsc-souls i:nth-child(5) { top: 75%; left: 50%; animation-delay: 3.2s; }
+@keyframes rsc-soul-float { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; } 50% { transform: translateY(-1em) scale(1.2); opacity: 0.8; } }
+
+
+.rsc-divider { display: flex; align-items: center; gap: 0.4em; margin: 0.35em 0; }
+.rsc-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(34, 229, 138, 0.3), transparent); }
+.rsc-div-icon { width: 0.75em; height: 0.75em; fill: var(--glow); opacity: 0.6; }
+
+.rsc-skill {
+  padding: 0.35em 0.5em; background: rgba(34, 229, 138, 0.08); border-left: 2px solid var(--glow);
+  border-radius: 0 0.3em 0.3em 0; margin-bottom: 0.35em;
+}
+.rsc-skill.alt { background: rgba(186, 255, 56, 0.08); border-left-color: var(--glow-alt); }
+.rsc-skill-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.12em; }
+.rsc-skill-name { font-size: 0.6em; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+.rsc-skill-tag { font-size: 0.42em; font-weight: 600; letter-spacing: 0.1em; color: var(--glow-alt); padding: 0.14em 0.36em; border: 1px solid rgba(186, 255, 56, 0.4); border-radius: 0.2em; }
+.rsc-skill-desc { margin: 0; font-size: 0.5em; color: var(--text-dim); line-height: 1.35; }
+
+.rsc-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 0.35em; }
+.rsc-rarity { display: flex; gap: 0.2em; }
+.rsc-rarity i { width: 0.38em; height: 0.38em; background: linear-gradient(135deg, var(--gold), #f59e0b); border-radius: 1px; transform: rotate(45deg); box-shadow: 0 0 0.3em rgba(255, 200, 91, 0.5); font-style: normal; }
+.rsc-set { font-size: 0.4em; color: var(--text-dim); letter-spacing: 0.04em; }
+
+.rsc-edge-glow {
+  position: absolute; inset: -1em;
+  background: radial-gradient(ellipse at 50% 0%, rgba(34, 229, 138, 0.15) 0%, transparent 50%);
+  pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
+}
+.rsc-card:hover .rsc-edge-glow { opacity: 1; }
+
+@media (max-width: 900px) {
+  .rsc-slot { display: none; }
+}
