@@ -6,7 +6,15 @@ import ForegroundHUD from '../../components/landing/ForegroundHUD'
 import Modal from '../../components/ui/Modal'
 import Pagination from '../../components/ui/Pagination'
 import MarketDirectionChart from '../../components/dashboard/MarketDirectionChart'
+import FearGreedIndex from '../../components/dashboard/FearGreedIndex'
+import AISignalsWidget from '../../components/dashboard/AISignalsWidget'
+import SignalBotWidget from '../../components/dashboard/SignalBotWidget'
+import WhaleActivityMonitor from '../../components/dashboard/WhaleActivityMonitor'
+import WhaleAlertsWidget from '../../components/dashboard/WhaleAlertsWidget'
+import CoinScannerWidget from '../../components/dashboard/CoinScannerWidget'
 import AIDailyBrief from '../../components/crypto-scanner/AIDailyBrief'
+import { ReactQueryProvider } from '../../lib/queryClient'
+import LiveMarketIndicators from '../../components/dashboard/LiveMarketIndicators'
 
 const quickActions = [
   { title: 'Scan Whale Alerts', desc: 'Pantau akumulasi/distribusi whale real-time', href: '/dashboard' },
@@ -39,49 +47,54 @@ export default function HomeGamePage() {
   const pagedNews = useMemo(() => news.slice((newsPage - 1) * pageSize, newsPage * pageSize), [newsPage])
 
   return (
+    <ReactQueryProvider>
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-3xl card-glass p-6 sm:p-8">
+      <section className="home-command-card relative overflow-hidden rounded-3xl card-glass p-6 sm:p-8">
         <ParallaxBackground />
         <ForegroundHUD />
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-          <div className="lg:col-span-2">
-            <h1 className="text-4xl sm:text-5xl font-game text-neon mb-3">Home Command Center</h1>
-            <p className="text-slate-300 max-w-xl">
-              Mode cepat untuk akses fitur utama: berita market, narrative tracker, whale alert, dan aksi instan scanner.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/dashboard" className="btn-theme">Open Dashboard</Link>
-              <Link href="/crypto-scanner" className="btn-theme">Open Scanner</Link>
-            </div>
-          </div>
-          <div className="card-glass rounded-2xl p-4">
-            <div className="text-sm text-slate-400 mb-2">Quick Pulse</div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[rgba(34,197,94,0.1)] rounded-lg p-3">
-                <div className="text-xs text-slate-400">Whale Signals</div>
-                <div className="text-xl font-bold text-green-400">+19</div>
-              </div>
-              <div className="bg-[rgba(239,68,68,0.1)] rounded-lg p-3">
-                <div className="text-xs text-slate-400">Risk Alerts</div>
-                <div className="text-xl font-bold text-red-400">+6</div>
-              </div>
-              <div className="bg-[rgba(59,130,246,0.1)] rounded-lg p-3">
-                <div className="text-xs text-slate-400">Active Tokens</div>
-                <div className="text-xl font-bold text-blue-400">17,319</div>
-              </div>
-              <div className="bg-[rgba(234,179,8,0.1)] rounded-lg p-3">
-                <div className="text-xs text-slate-400">F&G Index</div>
-                <div className="text-xl font-bold text-yellow-300">27 Fear</div>
-              </div>
-            </div>
+        <img src="/assets/ic_dashboard_1.svg" alt="" className="home-command-bg-image home-command-bg-image-main" />
+        <img src="/assets/ic_build.png" alt="" className="home-command-bg-image home-command-bg-image-secondary" />
+        <div className="relative z-10">
+          <h1 className="text-4xl sm:text-5xl font-game text-neon mb-3">Crypy Crypto Scanner</h1>
+          <p className="text-slate-300 max-w-xl">
+            Mode cepat untuk akses fitur utama: berita market, narrative tracker, whale alert, dan aksi instan scanner.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/dashboard" className="btn-theme">Open Dashboard</Link>
+            <Link href="/crypto-scanner" className="btn-theme">Open Scanner</Link>
           </div>
         </div>
       </section>
 
-      {/* Market Direction Chart */}
+      {/* Live Indicators: Signal · Futures · Whale */}
       <section>
-        <MarketDirectionChart />
+        <LiveMarketIndicators />
       </section>
+
+      {/* Market Direction + Fear & Greed */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MarketDirectionChart />
+        </div>
+        <div className="space-y-6">
+          <FearGreedIndex />
+        </div>
+      </section>
+
+      {/* AI Signals */}
+      <AISignalsWidget />
+
+      {/* Signal Bot */}
+      <SignalBotWidget />
+
+      {/* Whale Activity Monitor */}
+      <WhaleActivityMonitor />
+
+      {/* Whale Alert Signals */}
+      <WhaleAlertsWidget />
+
+      {/* Coin Scanner */}
+      <CoinScannerWidget />
 
       {/* AI Daily Brief */}
       <section>
@@ -162,5 +175,6 @@ export default function HomeGamePage() {
         </div>
       </Modal>
     </div>
+    </ReactQueryProvider>
   )
 }

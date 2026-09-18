@@ -22,6 +22,7 @@ export interface DexPair {
   baseToken: any
   quoteToken: any
   url: string
+  image?: string
 }
 
 export function useDexAnalyzer() {

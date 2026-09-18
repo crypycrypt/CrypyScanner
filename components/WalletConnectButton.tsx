@@ -1,65 +1,129 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 
-export default function WalletConnectButton() {
-  const [address, setAddress] = useState<string | null>(null)
+// Donation wallet (Solana). Can be overridden via NEXT_PUBLIC_DONATION_WALLET env.
+const DONATION_WALLET =
+  process.env.NEXT_PUBLIC_DONATION_WALLET || 'FC8xKNeiDuSrJrmw3TFdZSfNFWJemCk5QnhXgM2zkKcD'
+
+const EXPLORER_URL = `https://solscan.io/account/${DONATION_WALLET}`
+
+function buildQrUrl(address: string, size = 220): string {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(address)}`
+}
+
+export default function DonationButton() {
+  const [open, setOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    // Use eth_accounts (read-only, no MetaMask popup) to check if already connected
-    checkConnected()
-    const eth = typeof window !== 'undefined' ? (window as any).ethereum : null
-    if (!eth) return
-    const handler = (accounts: string[]) => {
-      setAddress(accounts.length > 0 ? accounts[0] : null)
-    }
-    eth.on('accountsChanged', handler)
     return () => {
-      try { eth.removeListener?.('accountsChanged', handler) } catch { /* ignore */ }
+      if (copyTimer.current) clearTimeout(copyTimer.current)
     }
   }, [])
 
-  async function checkConnected() {
+  async function copyAddress() {
     try {
-      const eth = typeof window !== 'undefined' ? (window as any).ethereum : null
-      if (!eth) return
-      // eth_accounts does NOT trigger MetaMask popup — safe to call silently
-      const accounts: string[] = await eth.request({ method: 'eth_accounts' })
-      if (accounts?.length > 0) setAddress(accounts[0])
-    } catch {
-      // wallet not ready — do nothing, no overlay
-    }
-  }
-
-  async function connect() {
-    try {
-      const eth = typeof window !== 'undefined' ? (window as any).ethereum : null
-      if (!eth) {
-        alert('No Web3 wallet found. Please install MetaMask or another browser wallet.')
-        return
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(DONATION_WALLET)
+      } else {
+        // Fallback for non-secure contexts
+        const ta = document.createElement('textarea')
+        ta.value = DONATION_WALLET
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.focus()
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
       }
-      const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' })
-      if (accounts?.length > 0) setAddress(accounts[0])
-    } catch (e: any) {
-      if (e?.code === 4001) return // user rejected — silent
-      console.error('Wallet connect error:', e?.message ?? e)
+      setCopied(true)
+      if (copyTimer.current) clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), 2000)
+    } catch (e) {
+      console.error('Copy failed:', e)
     }
   }
 
-  function disconnect() {
-    setAddress(null)
-  }
+  const modal = open ? (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      onClick={() => setOpen(false)}
+    >
+      <div
+        className="landing-card w-full max-w-sm rounded-2xl p-6 text-center relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 text-slate-400 hover:text-white text-lg leading-none"
+              aria-label="Close"
+            >
+              ✕
+            </button>
 
-  if (!address) {
-    return (
-      <button onClick={connect} className="btn-theme btn-theme-sm">Connect Wallet</button>
-    )
-  }
+            <h3 className="text-xl font-bold text-neon mb-1">💝 Support This Project</h3>
+            <p className="text-xs text-slate-400 mb-5">
+              Scan the QR code or copy the address to send a donation (SOL / Solana tokens).
+            </p>
 
-  const shortened = `${address.slice(0, 6)}...${address.slice(-4)}`
+            {/* QR Code */}
+            <div className="bg-white rounded-xl p-3 inline-block mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={buildQrUrl(DONATION_WALLET)}
+                alt="Donation wallet QR code"
+                width={220}
+                height={220}
+                className="rounded"
+              />
+            </div>
+
+            {/* Address */}
+            <div className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-lg p-3 mb-3">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 mb-1 text-left">
+                Solana Wallet Address
+              </div>
+              <div className="font-mono text-xs text-slate-200 break-all text-left leading-relaxed">
+                {DONATION_WALLET}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={copyAddress}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  copied
+                    ? 'bg-green-600/30 text-green-400 border border-green-500/40'
+                    : 'bg-[rgba(99,102,241,0.15)] text-indigo-400 border border-[rgba(99,102,241,0.3)] hover:bg-[rgba(99,102,241,0.25)]'
+                }`}
+              >
+                {copied ? '✓ Copied!' : '📋 Copy Address'}
+              </button>
+              <a
+                href={EXPLORER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold bg-[rgba(255,255,255,0.06)] text-slate-300 border border-[rgba(255,255,255,0.12)] hover:bg-[rgba(255,255,255,0.12)] transition-colors text-center"
+              >
+                🔗 Solscan
+              </a>
+            </div>
+          </div>
+        </div>
+  ) : null
+
   return (
-    <div className="flex items-center gap-2">
-      <span className="px-3 py-1 bg-[rgba(255,255,255,0.04)] rounded-md text-sm font-mono">{shortened}</span>
-      <button onClick={disconnect} className="btn-theme btn-theme-sm">Disconnect</button>
-    </div>
+    <>
+      <button onClick={() => setOpen(true)} className="btn-theme btn-theme-sm">
+        💝 Donation
+      </button>
+
+      {modal && typeof document !== 'undefined'
+        ? createPortal(modal, document.body)
+        : null}
+    </>
   )
 }

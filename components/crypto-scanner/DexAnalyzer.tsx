@@ -75,7 +75,8 @@ export default function DexAnalyzer() {
       d7: p.d7, 
       volume: p.vol24, 
       mcap: p.mcap, 
-      liq: p.liq 
+      liq: p.liq,
+      image: p.image
     })
     setAnalyzeOpen(true)
   }
@@ -173,7 +174,7 @@ export default function DexAnalyzer() {
               <div key={p.id} onClick={() => setSelected(p)}
                 className="px-3 py-2.5 flex items-center gap-3 cursor-pointer hover:bg-[rgba(255,255,255,0.03)] transition-colors border-b border-[rgba(255,255,255,0.025)]"
                 style={{ background: selected?.id === p.id ? 'rgba(99,102,241,0.09)' : '' }}>
-                <CoinIcon symbol={p.symbol} size={28} />
+                <CoinIcon symbol={p.symbol} size={28} image={p.image} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-xs text-white truncate">{p.symbol}</span>
@@ -209,7 +210,7 @@ export default function DexAnalyzer() {
               {/* Token header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <CoinIcon symbol={selected.symbol} size={44} />
+                  <CoinIcon symbol={selected.symbol} size={44} image={selected.image} />
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-xl">{selected.symbol}</span>

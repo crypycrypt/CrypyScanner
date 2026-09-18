@@ -1,0 +1,127 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+// Simulated activity heatmap data
+// In production, this would aggregate on-chain whale transaction data
+// grouped by day and hour, computing profit/loss, win rate, and event counts
+
+interface HeatmapCell {
+  day: number // 0 = today, 6 = 6 days ago
+  hour: number // 0-23
+  date: string
+  events: number
+  profit: number
+  winRate: number
+  avgEntry: number
+  intensity: number // 0-1
+}
+
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const TOKENS = ['FROG69', 'BONK', 'WIF', 'JUP', 'RENDER', 'JTO', 'PYTH', 'SAMO', 'WIFINU', 'FROGX']
+
+function generateHeatmap(): HeatmapCell[] {
+  const cells: HeatmapCell[] = []
+  const now = new Date()
+
+  for (let day = 6; day >= 0; day--) {
+    const date = new Date(now)
+    date.setDate(now.getDate() - day)
+    const dateStr = date.toISOString().split('T')[0]
+
+    for (let hour = 0; hour < 24; hour++) {
+      // Higher activity during market hours (UTC 8-16)
+      const isMarketHour = hour >= 8 && hour <= 16
+      const baseActivity = isMarketHour ? 0.6 : 0.2
+      const randomFactor = Math.random() * 0.4
+
+      // Weekend has lower activity
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6
+      const weekendFactor = isWeekend ? 0.5 : 1
+
+      const intensity = Math.min(1, baseActivity + randomFactor * weekendFactor)
+      const events = Math.floor(intensity * 20)
+      const profit = +(Math.random() * 10 - 3).toFixed(2)
+      const winRate = Math.round(30 + intensity * 50)
+      const avgEntry = +(Math.random() * 0.01).toFixed(6)
+
+      cells.push({
+        day: 6 - day, // 0 = today
+        hour,
+        date: dateStr,
+        events,
+        profit,
+        winRate,
+        avgEntry,
+        intensity,
+      })
+    }
+  }
+
+  return cells
+}
+
+function computeDenseWindow(cells: HeatmapCell[]): { start: number; end: number; label: string } {
+  // Aggregate intensity by hour across all days
+  const hourTotals: number[] = Array(24).fill(0)
+  cells.forEach((c) => {
+    hourTotals[c.hour] += c.intensity
+  })
+
+  // Find the 3-hour window with highest total intensity
+  let bestStart = 0
+  let bestTotal = 0
+  for (let h = 0; h <= 21; h++) {
+    const total = hourTotals[h] + hourTotals[h + 1] + hourTotals[h + 2]
+    if (total > bestTotal) {
+      bestTotal = total
+      bestStart = h
+    }
+  }
+
+  const end = bestStart + 2
+  const startStr = bestStart.toString().padStart(2, '0') + ':00'
+  const endStr = (end + 1).toString().padStart(2, '0') + ':00'
+
+  return {
+    start: bestStart,
+    end,
+    label: `${startStr} — ${endStr} UTC`,
+  }
+}
+
+let cache: any = null
+let cacheTs = 0
+const TTL = 30_000 // 30 seconds
+
+export async function GET(request: NextRequest) {
+  const forceRefresh = request.nextUrl.searchParams.get('refresh') === '1'
+
+  if (!forceRefresh && cache && Date.now() - cacheTs < TTL) {
+    return NextResponse.json({ ok: true, cached: true, ...cache })
+  }
+
+  try {
+    await new Promise(r => setTimeout(r, 50 + Math.random() * 100))
+
+    const cells = generateHeatmap()
+    const denseWindow = computeDenseWindow(cells)
+
+    const result = {
+      cells,
+      denseWindow,
+      days: DAYS,
+      fetchedAt: new Date().toISOString(),
+    }
+
+    cache = result
+    cacheTs = Date.now()
+
+    return NextResponse.json({ ok: true, cached: false, ...result })
+  } catch (error: any) {
+    console.error('/api/smart-money/activity-heatmap error:', error?.message ?? error)
+    if (cache) return NextResponse.json({ ok: true, cached: true, stale: true, ...cache })
+    return NextResponse.json(
+      { ok: false, error: error?.message || 'Failed to fetch activity heatmap' },
+      { status: 500 }
+    )
+  }
+}

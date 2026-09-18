@@ -1,42 +1,42 @@
-// API route to serve signals from crypto-scanner signals.json
+// API route — serves REAL live signals from lib/signalEngine.ts
+// (13-engine quant scanner on live Binance data, ported from crypto-scanner signal-bot).
+// Response shape: bare JSON array of signal objects (compatible with
+// MemeDashboard, SignalTerminal, useSignalBotRealTime, useSignalBot).
+// Optional query params:
+//   ?report=1  → returns { signals, report } with full scan log lines
+//   ?force=1   → forces a fresh scan instead of using cache
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getLiveSignals, getLiveScanReport, peekLiveSignals } from '@/lib/signalEngine';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Path to the crypto-scanner signals.json file
-    const signalsPath = path.join('/Users/radityakusuma/Documents/crypto-scanner', 'signals.json');
-    
-    // Check if file exists
-    if (!fs.existsSync(signalsPath)) {
-      return NextResponse.json(
-        { error: 'Signals file not found' },
-        { status: 404 }
-      );
+    const { searchParams } = new URL(request.url);
+    const wantReport = searchParams.get('report') === '1';
+    const force = searchParams.get('force') === '1';
+
+    if (wantReport) {
+      const { signals, report } = await getLiveScanReport(force);
+      return NextResponse.json({ signals, report });
     }
 
-    // Read and parse the signals file
-    const data = fs.readFileSync(signalsPath, 'utf-8');
-    const signals = JSON.parse(data);
+    // Fast path: serve cached signals immediately (background rescan is
+    // kicked off automatically by peekLiveSignals when the cache is stale).
+    if (!force) {
+      const peek = peekLiveSignals();
+      if (peek.signals.length > 0) {
+        return NextResponse.json(peek.signals);
+      }
+    }
 
-    // Filter signals from last 24 hours only
-    const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
-    const recentSignals = signals.filter((signal: any) => 
-      new Date(signal.timestamp).getTime() > twentyFourHoursAgo
-    );
-
-    // Limit to top 50 signals by confidence
-    const topSignals = recentSignals
-      .sort((a: any, b: any) => b.confidence - a.confidence)
-      .slice(0, 50);
-
-    return NextResponse.json(topSignals);
-
+    // Cold start (or forced): await the live scan.
+    const signals = await getLiveSignals(force);
+    return NextResponse.json(signals);
   } catch (error) {
-    console.error('Error reading signals file:', error);
+    console.error('Error serving live signals:', error);
     return NextResponse.json(
-      { error: 'Failed to read signals data' },
+      { error: 'Failed to fetch live signals' },
       { status: 500 }
     );
   }

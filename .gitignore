@@ -13,6 +13,9 @@ prisma/client/
 .env.local
 .env.*.local
 
+# Local scratch test harnesses
+.tmp-wallet-test/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -25,3 +28,8 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.vercel
+.paper-trader-state.json
+
+# Dedup store sinyal Telegram radar Meme (persisten, jangan di-commit)
+.data/

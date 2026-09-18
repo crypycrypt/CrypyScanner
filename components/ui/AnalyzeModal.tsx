@@ -1,7 +1,8 @@
 "use client"
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import Modal from './Modal'
 import CoinIcon from './CoinIcon'
+import WalletFlowGraph from '../crypto-scanner/WalletFlowGraph'
 
 export interface CoinAnalyzeData {
   symbol: string
@@ -14,6 +15,7 @@ export interface CoinAnalyzeData {
   mcap?: string
   liq?: string
   signal?: string
+  image?: string
 }
 
 interface Props {
@@ -150,6 +152,12 @@ function FibRow({ level, price, label, isCurrent, ext = false }: any) {
 }
 
 export default function AnalyzeModal({ open, onClose, coin }: Props) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
   const a = useMemo(() => {
     if (!coin) return null
     const sd = seedOf(coin.symbol)
@@ -260,11 +268,11 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="space-y-5">
+      <div className="space-y-5" suppressHydrationWarning>
 
         {/* ─── Header ───────────────────────────────────────────── */}
         <div className="flex items-start gap-4 pb-4 border-b border-[rgba(255,255,255,0.06)]">
-          <CoinIcon symbol={coin.symbol} size={52} />
+          <CoinIcon symbol={coin.symbol} size={52} image={coin.image} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-bold">{coin.name}</h2>
@@ -417,7 +425,13 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
           </div>
         </div>
 
-        {/* ─── 7. Fibonacci Potential ───────────────────────────── */}
+        {/* ─── 7. Wallet Flow Graph ─────────────────────────────── */}
+        <div className="card-glass rounded-xl p-4">
+          <SectionHead icon="🔄" title="Wallet Flow Analysis" sub={`Real-time wallet movements for ${coin.symbol}`} />
+          <WalletFlowGraph coin={{ symbol: coin.symbol, name: coin.name }} />
+        </div>
+
+        {/* ─── 8. Fibonacci Potential ───────────────────────────── */}
         <div className="card-glass rounded-xl p-4">
           <SectionHead icon="🔢" title="Fibonacci Potential" sub="Current price vs key retracement levels" />
           <div className="space-y-1.5">
@@ -425,7 +439,7 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
           </div>
         </div>
 
-        {/* ─── 8. Macro Sentiment ───────────────────────────────── */}
+        {/* ─── 9. Macro Sentiment ───────────────────────────────── */}
         <div className="card-glass rounded-xl p-4">
           <SectionHead icon="🌍" title="Macro Sentiment" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -453,7 +467,7 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
           </div>
         </div>
 
-        {/* ─── 9. Futures Analysis ──────────────────────────────── */}
+        {/* ─── 10. Futures Analysis ──────────────────────────────── */}
         <div className="card-glass rounded-xl p-4">
           <SectionHead icon="📊" title="Futures Analysis — BTC/USDT Perp" sub="Perpetual contract metrics" />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
@@ -484,7 +498,7 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
           </div>
         </div>
 
-        {/* ─── 10. Indicator Guide ──────────────────────────────── */}
+        {/* ─── 11. Indicator Guide ──────────────────────────────── */}
         <div className="card-glass rounded-xl p-4">
           <SectionHead icon="📐" title="Indicator Guide — MA / EMA / MACD" />
           <div className="overflow-x-auto">
@@ -521,7 +535,7 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
           </div>
         </div>
 
-        {/* ─── 11. AI Coin Scoring ──────────────────────────────── */}
+        {/* ─── 12. AI Coin Scoring ──────────────────────────────── */}
         <div className="card-glass rounded-xl p-4">
           <SectionHead icon="🤖" title="AI Coin Scoring & Rankings" />
           <div className="flex items-center gap-5 mb-5">
@@ -541,7 +555,7 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
                 {a.aiScore >= 75 ? 'Strong Signal' : a.aiScore >= 60 ? 'Moderate Signal' : a.aiScore >= 50 ? 'Watch Zone' : 'Weak Signal'}
               </div>
               <div className="text-xs text-slate-400 mt-0.5">Composite AI score from 6 factors</div>
-              <div className="text-xs text-slate-500 mt-0.5">Updated: {new Date().toLocaleTimeString()}</div>
+              <div className="text-xs text-slate-500 mt-0.5">Updated: {mounted ? new Date().toLocaleTimeString() : '--:--:--'}</div>
             </div>
           </div>
           <div className="space-y-2.5">
@@ -549,7 +563,7 @@ export default function AnalyzeModal({ open, onClose, coin }: Props) {
           </div>
         </div>
 
-        {/* ─── 12. Fibonacci Retracement & Extension Levels ────── */}
+        {/* ─── 13. Fibonacci Retracement & Extension Levels ────── */}
         <div className="card-glass rounded-xl p-4">
           <SectionHead icon="📐" title="Fibonacci Retracement & Extension Levels" sub="Based on recent major swing high/low" />
           <div className="mb-4">

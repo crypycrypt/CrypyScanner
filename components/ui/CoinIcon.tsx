@@ -12,18 +12,58 @@ interface Props {
   symbol: string
   size?: number
   className?: string
+  image?: string | null
 }
 
-export default function CoinIcon({ symbol, size = 32, className = '' }: Props) {
+const FALLBACK_IMAGES: Record<string, string> = {
+  LDO: 'https://assets.coingecko.com/coins/images/13573/large/Lido_DAO.png?1696513326',
+  ETH: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1696501628',
+  BTC: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1696501400',
+  SOL: 'https://assets.coingecko.com/coins/images/4128/large/solana.png?1718769756',
+  BNB: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970',
+}
+
+export default function CoinIcon({ symbol, size = 32, className = '', image }: Props) {
   const clean = symbol.replace(/^\$/, '').toUpperCase()
-  const [failed, setFailed] = useState(false)
+  const [failedImage, setFailedImage] = useState(false)
+  const [failedMappedImage, setFailedMappedImage] = useState(false)
+  const [failedCdn, setFailedCdn] = useState(false)
   const hue = symHue(clean)
+  const mappedImage = FALLBACK_IMAGES[clean]
 
   // spothq/cryptocurrency-icons covers 800+ coins by lowercase symbol
   // e.g. btc, eth, sol, bnb, xrp, usdt, yfi, uni, comp, aave …
   const src = `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/${clean.toLowerCase()}.png`
 
-  if (failed) {
+  if (image && !failedImage) {
+    return (
+      <img
+        src={image}
+        alt={clean}
+        width={size}
+        height={size}
+        onError={() => setFailedImage(true)}
+        className={`rounded-full object-contain flex-shrink-0 ${className}`}
+        style={{ width: size, height: size, background: 'rgba(255,255,255,0.03)' }}
+      />
+    )
+  }
+
+  if (mappedImage && !failedMappedImage) {
+    return (
+      <img
+        src={mappedImage}
+        alt={clean}
+        width={size}
+        height={size}
+        onError={() => setFailedMappedImage(true)}
+        className={`rounded-full object-contain flex-shrink-0 ${className}`}
+        style={{ width: size, height: size, background: 'rgba(255,255,255,0.03)' }}
+      />
+    )
+  }
+
+  if (failedCdn) {
     // Fallback: colored circle avatar with first 2 chars
     return (
       <div
@@ -49,7 +89,7 @@ export default function CoinIcon({ symbol, size = 32, className = '' }: Props) {
       alt={clean}
       width={size}
       height={size}
-      onError={() => setFailed(true)}
+      onError={() => setFailedCdn(true)}
       className={`rounded-full object-contain flex-shrink-0 ${className}`}
       style={{ width: size, height: size, background: 'rgba(255,255,255,0.03)' }}
     />

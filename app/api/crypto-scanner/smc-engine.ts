@@ -40,6 +40,12 @@ type BOSEvent = {
   strength: number;
 };
 
+type ManipulationWarning = {
+  type: string;
+  riskScore: number;
+  details: string[];
+};
+
 type Signal = {
   signal: 'LONG' | 'SHORT' | 'NONE';
   confidence: number;
@@ -48,6 +54,9 @@ type Signal = {
   bos?: BOSEvent;
   fvg?: FVGZone;
   scores?: Record<string, number>;
+  manipulationScore?: number;
+  manipulationWarnings?: ManipulationWarning[];
+  filteredSignal?: 'LONG' | 'SHORT' | 'WAIT' | 'NO_TRADE';
 };
 
 type AnalysisResult = {
@@ -55,6 +64,11 @@ type AnalysisResult = {
   swings: { highs: SwingPoint[]; lows: SwingPoint[] };
   bosEvents: BOSEvent[];
   signal: Signal;
+  manipulation?: {
+    score: number;
+    isManipulated: boolean;
+    warnings: ManipulationWarning[];
+  };
   meta: {
     candleCount: number;
     fvgCount: number;
@@ -92,12 +106,33 @@ export const SmcEngine = {
     const swings = this.detectSwings(candles, swingLookback);
     const bosEvents = this.detectBOS(candles, swings);
     const signal = this.generateSignal(candles, fvgZones, bosEvents);
+    
+    // Run manipulation detection
+    const manipulation = this.detectManipulation(candles, signal.signal, bosEvents, fvgZones);
+
+    // Filter signal based on manipulation
+    let filteredSignal: 'LONG' | 'SHORT' | 'WAIT' | 'NO_TRADE' | undefined = signal.signal as 'LONG' | 'SHORT' | 'WAIT' | 'NO_TRADE' | undefined;
+    if (manipulation.score > 70) {
+      filteredSignal = 'WAIT';
+    } else if (manipulation.score > 50 && manipulation.warnings.length > 0) {
+      filteredSignal = 'WAIT';
+    }
 
     return {
       fvgZones,
       swings,
       bosEvents,
-      signal,
+      signal: {
+        ...signal,
+        manipulationScore: manipulation.score,
+        manipulationWarnings: manipulation.warnings,
+        filteredSignal: filteredSignal !== signal.signal ? filteredSignal : undefined,
+      },
+      manipulation: manipulation.score > 30 ? {
+        score: manipulation.score,
+        isManipulated: manipulation.isManipulated,
+        warnings: manipulation.warnings,
+      } : undefined,
       meta: {
         candleCount: candles.length,
         fvgCount: fvgZones.length,
@@ -247,6 +282,134 @@ export const SmcEngine = {
     }
 
     return events.sort((a, b) => a.idx - b.idx);
+  },
+
+  detectManipulation(
+    candles: Candle[],
+    signal: 'LONG' | 'SHORT' | 'NONE',
+    bosEvents: BOSEvent[],
+    fvgZones: FVGZone[]
+  ): { score: number; isManipulated: boolean; warnings: { type: string; riskScore: number; details: string[] }[] } {
+    const warnings: { type: string; riskScore: number; details: string[] }[] = [];
+    let totalScore = 0;
+
+    if (signal === 'NONE') {
+      return { score: 0, isManipulated: false, warnings: [] };
+    }
+
+    // 1. Detect false breakout
+    const recentBOS = bosEvents.filter(b => b.idx >= candles.length - 8);
+    for (const bos of recentBOS) {
+      const candlesAfter = candles.slice(bos.idx + 1);
+      if (candlesAfter.length >= 3) {
+        const reversed = bos.type === 'bullish'
+          ? candlesAfter.slice(0, 3).some(c => c.close < bos.breakPrice)
+          : candlesAfter.slice(0, 3).some(c => c.close > bos.breakPrice);
+        
+        if (reversed) {
+          warnings.push({
+            type: 'FALSE_BREAKOUT',
+            riskScore: 80,
+            details: [`BOS at ${bos.breakPrice.toFixed(4)} reversed within 3 candles`],
+          });
+          totalScore += 80;
+        }
+      }
+    }
+
+    // 2. Detect volume anomaly
+    const lastCandle = candles[candles.length - 1];
+    const avgVolume = candles.slice(-20).reduce((s, c) => s + (c.volume || 0), 0) / 20;
+    const relativeVolume = (lastCandle.volume || 0) / (avgVolume || 1);
+    
+    if (relativeVolume > 2.5) {
+      const priceMove = Math.abs(lastCandle.close - lastCandle.open);
+      const avgMove = candles.slice(-10).reduce((s, c) => s + Math.abs(c.close - c.open), 0) / 10;
+      
+      if (priceMove < avgMove * 0.5) {
+        warnings.push({
+          type: 'VOLUME_ANOMALY',
+          riskScore: 65,
+          details: [`Volume spike (${relativeVolume.toFixed(1)}x) without proportional price movement`],
+        });
+        totalScore += 65;
+      }
+    }
+
+    // 3. Detect wick rejection
+    const recentCandles = candles.slice(-5);
+    for (const candle of recentCandles) {
+      const bodySize = Math.abs(candle.close - candle.open);
+      const upperWick = candle.high - Math.max(candle.open, candle.close);
+      const lowerWick = Math.min(candle.open, candle.close) - candle.low;
+      const totalRange = candle.high - candle.low;
+
+      if (totalRange > 0) {
+        const upperWickRatio = upperWick / totalRange;
+        const lowerWickRatio = lowerWick / totalRange;
+
+        if (signal === 'LONG' && upperWickRatio > 0.6 && bodySize / totalRange < 0.3) {
+          warnings.push({
+            type: 'WICK_REJECTION',
+            riskScore: 55,
+            details: [`Bearish wick rejection at ${candle.high.toFixed(4)}`],
+          });
+          totalScore += 55;
+          break;
+        }
+
+        if (signal === 'SHORT' && lowerWickRatio > 0.6 && bodySize / totalRange < 0.3) {
+          warnings.push({
+            type: 'WICK_REJECTION',
+            riskScore: 55,
+            details: [`Bullish wick rejection at ${candle.low.toFixed(4)}`],
+          });
+          totalScore += 55;
+          break;
+        }
+      }
+    }
+
+    // 4. Detect FVG manipulation
+    for (const fvg of fvgZones) {
+      if (fvg.filled) continue;
+      
+      const filledRecently = candles.slice(-5).some(c => {
+        if (fvg.type === 'bullish') return c.low <= fvg.bottom;
+        return c.high >= fvg.top;
+      });
+
+      if (filledRecently) {
+        warnings.push({
+          type: 'FVG_MANIPULATION',
+          riskScore: 70,
+          details: [`FVG at ${fvg.bottom.toFixed(4)}-${fvg.top.toFixed(4)} was recently filled`],
+        });
+        totalScore += 70;
+        break;
+      }
+    }
+
+    // 5. Time-based manipulation
+    const hour = new Date(lastCandle.time).getUTCHours();
+    const lowLiquidityHours = [0, 1, 2, 3, 4, 5, 6, 7, 12, 13];
+    if (lowLiquidityHours.includes(hour)) {
+      warnings.push({
+        type: 'TIME_BASED_MANIPULATION',
+        riskScore: 40,
+        details: [`Low liquidity period (${hour}:00 UTC)`],
+      });
+      totalScore += 40;
+    }
+
+    const avgScore = warnings.length > 0 ? totalScore / warnings.length : 0;
+    const isManipulated = avgScore > 60;
+
+    return {
+      score: Math.min(100, Math.round(avgScore)),
+      isManipulated,
+      warnings,
+    };
   },
 
   generateSignal(candles: Candle[], fvgZones: FVGZone[], bosEvents: BOSEvent[]): Signal {

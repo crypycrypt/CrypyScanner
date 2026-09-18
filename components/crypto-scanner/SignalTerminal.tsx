@@ -27,6 +27,9 @@ interface Signal {
   timestamp: string;
   signalReason: string;
   subScores?: Array<{label: string, score: number}>;
+  manipulationScore?: number;
+  manipulationWarnings?: string[];
+  filteredSignal?: 'LONG' | 'SHORT' | 'WAIT' | 'NO_TRADE';
 }
 
 const SignalTerminal: React.FC<SignalTerminalProps> = ({ signals = [] }) => {
@@ -61,7 +64,7 @@ const SignalTerminal: React.FC<SignalTerminalProps> = ({ signals = [] }) => {
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) + ' ' + fmtTime(iso);
   };
 
-  const uid = (s: Signal): string => s.coinId + '_' + s.signal + '_' + s.timestamp;
+  const uid = (s: Signal, idx?: number): string => s.coinId + '_' + s.signal + '_' + s.timestamp + (idx !== undefined ? '_' + idx : '');
 
   // Matrix rain animation
   useEffect(() => {
@@ -261,6 +264,7 @@ const SignalTerminal: React.FC<SignalTerminalProps> = ({ signals = [] }) => {
           <div className="sterm-stat">TOTAL <span className="sterm-stat-val">{allSignals.length}</span></div>
           <div className="sterm-stat">INTERVAL <span className="sterm-stat-val">15s</span></div>
           <div className="sterm-stat">UPDATED <span className="sterm-stat-val">{new Date().toLocaleTimeString('id-ID')}</span></div>
+          <div className="sterm-stat">ANTI-MANIP <span className="sterm-stat-val">{allSignals.filter(s => s.manipulationScore && s.manipulationScore > 50).length}</span></div>
         </div>
         
         <div className="sterm-ticker-wrap">
@@ -281,21 +285,21 @@ const SignalTerminal: React.FC<SignalTerminalProps> = ({ signals = [] }) => {
         
         <div ref={feedRef} className="sterm-feed" id="stermFeed">
           {feedLines.map((line, idx) => (
-            <div key={idx} className="sterm-line">
+            <div key={`line-${idx}`} className="sterm-line">
               <span className="sterm-line-ts">{line.timestamp}</span>
               <span className={`sterm-line-tag sterm-line-tag-${line.tagClass}`}>{line.tag}</span>
               <span className="sterm-line-msg" dangerouslySetInnerHTML={{ __html: line.msg }} />
             </div>
           ))}
           
-          {signalCards.map(sig => {
+          {signalCards.map((sig, sidx) => {
             const isLong = sig.signal === 'LONG';
             const sub = (sig.subScores || []).slice(0, 3).map(s => 
               s.label.split(' ')[0] + ':' + s.score
             ).join(' · ');
             
             return (
-              <div key={uid(sig)} className={`sterm-signal-card sterm-card-${isLong ? 'long' : 'short'}`}>
+              <div key={uid(sig, sidx)} className={`sterm-signal-card sterm-card-${isLong ? 'long' : 'short'}`}>
                 <div className="sterm-card-header">
                   <span className={`sterm-card-coin sterm-card-coin-${isLong ? 'long' : 'short'}`}>
                     {isLong ? '▲' : '▼'} {sig.coinSymbol.toUpperCase()} / {sig.coinName}
@@ -339,6 +343,14 @@ const SignalTerminal: React.FC<SignalTerminalProps> = ({ signals = [] }) => {
                   <span>🎲 MC: <b>{sig.mcProbUp != null ? sig.mcProbUp : '—'}%</b></span>
                   <span>🕐 <b>{fmtDate(sig.timestamp)}</b></span>
                   {sub && <span>🔍 {sub}</span>}
+                  {sig.manipulationScore != null && (
+                    <span className={sig.manipulationScore > 50 ? 'sterm-manip-warn' : 'sterm-manip-ok'}>
+                      🛡️ MANIP: <b>{sig.manipulationScore}/100</b>
+                      {sig.filteredSignal && sig.filteredSignal !== sig.signal && (
+                        <span className="sterm-filtered">[FILTERED: {sig.filteredSignal}]</span>
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
             );

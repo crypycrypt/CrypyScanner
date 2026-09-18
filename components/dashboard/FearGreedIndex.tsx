@@ -41,30 +41,32 @@ export default function FearGreedIndex() {
 
   const fetchData = async () => {
     try {
-      setIsLoading(true)
-      
-      // Simulate fetching data from multiple APIs like crypto-scanner
-      const mockData: FearGreedData = {
+      // Real data from /api/market/overview (CoinGecko global + Alternative.me Fear&Greed)
+      const res = await fetch('/api/market/overview', { cache: 'no-store' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const m = await res.json()
+
+      const realData: FearGreedData = {
         fng: {
-          value: 42,
-          value_classification: 'Fear',
+          value: typeof m.fng === 'number' ? m.fng : 0,
+          value_classification: m.fngLabel || 'N/A',
           timestamp: new Date().toISOString()
         },
         global: {
-          total_market_cap: { usd: 2.1e12 },
-          total_volume: { usd: 85e9 },
-          market_cap_percentage: { btc: 52.3, eth: 17.8 },
-          market_cap_change_percentage_24h_usd: 1.2
+          total_market_cap: { usd: m.totalMcap || 0 },
+          total_volume: { usd: m.totalVolume || 0 },
+          market_cap_percentage: { btc: m.btcDominance || 0, eth: m.ethDominance || 0 },
+          market_cap_change_percentage_24h_usd: 0
         },
         prices: {
-          btc: 65000,
-          eth: 3500
+          btc: m.btc?.price || 0,
+          eth: m.eth?.price || 0
         },
-        dxy: 104.2,
-        us10y: 4.3
+        dxy: 0,
+        us10y: 0
       }
-      
-      setData(mockData)
+
+      setData(realData)
     } catch (error) {
       console.error('Error fetching Fear & Greed data:', error)
     } finally {

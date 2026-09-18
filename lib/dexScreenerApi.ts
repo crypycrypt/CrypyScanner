@@ -75,7 +75,8 @@ function parsePair(p: any) {
     pairAddress: pair.pairAddress,
     baseToken: base,
     quoteToken: quote,
-    url: pair.url
+    url: pair.url,
+    image: base.image || undefined
   }
 }
 

@@ -225,7 +225,7 @@ function AIDailyBrief() {
       {/* Header row */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-indigo-500 to-blue-400 rounded-lg p-2 text-lg">🤖</div>
+          <img src="/assets/ic_ai.svg" alt="ai-brief" className="w-8 h-8" />
           <div>
             <div className="text-white text-lg font-bold">AI Daily Brief</div>
             <div className="text-slate-500 text-xs">

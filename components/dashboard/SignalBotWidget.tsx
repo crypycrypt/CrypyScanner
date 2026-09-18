@@ -118,7 +118,7 @@ export default function SignalBotWidget() {
                         <tr key={signal.coinId} className="border-b border-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.02)] transition-colors">
                           <td className="px-3 py-2.5">
                             <div className="flex items-center gap-2">
-                              <CoinIcon symbol={signal.coinSymbol} size={24} />
+                              <CoinIcon symbol={signal.coinSymbol} size={24} image={signal.image} />
                               <div>
                                 <div className="font-medium">{signal.coinSymbol.toUpperCase()}</div>
                                 <div className="text-xs text-slate-400">{signal.coinName}</div>

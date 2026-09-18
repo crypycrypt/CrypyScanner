@@ -5,12 +5,14 @@ import SniperScanner from './SniperScanner'
 import DexAnalyzer from './DexAnalyzer'
 import SmartMoney from './SmartMoney'
 import FuturesAnalysisPage from './FuturesAnalysisPage'
+import WalletFlowGraph from './WalletFlowGraph'
 
 const TABS = [
   { id:'scanner', label:'Crypto Scanner' },
   { id:'sniper',  label:'Sniper Scanner' },
   { id:'dex',     label:'DEX Analyzer' },
   { id:'smart',   label:'Smart Money' },
+  { id:'wallet',  label:'Wallet Flow' },
   { id:'futures', label:'Futures Analysis' },
 ]
 
@@ -32,6 +34,7 @@ export default function CryptoScannerTabs(){
         {active==='sniper'  && <SniperScanner />}
         {active==='dex'     && <DexAnalyzer />}
         {active==='smart'   && <SmartMoney />}
+        {active==='wallet'  && <WalletFlowGraph />}
         {active==='futures' && <FuturesAnalysisPage />}
       </div>
     </div>

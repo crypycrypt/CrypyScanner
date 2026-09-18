@@ -5,5 +5,10 @@
   "regions": ["sin1"],
   "env": {
     "NEXTAUTH_URL": "https://whaleradar-ai.vercel.app"
+  },
+  "functions": {
+    "app/api/**/route.ts": {
+      "maxDuration": 60
+    }
   }
 }

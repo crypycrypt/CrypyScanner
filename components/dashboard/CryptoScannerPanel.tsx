@@ -72,8 +72,8 @@ export default function CryptoScannerPanel(){
       {!isLoading && (!data || data.length === 0) && <div className="text-slate-400">No scans available</div>}
       {!isLoading && data && (
         <div className="grid grid-cols-1 gap-3">
-          {pagedRows.map((s:any)=> (
-            <div key={s.id} className="p-3 rounded-md bg-[rgba(255,255,255,0.02)] flex items-start gap-3">
+          {pagedRows.map((s:any, sidx)=> (
+            <div key={`${s.id}-${sidx}`} className="p-3 rounded-md bg-[rgba(255,255,255,0.02)] flex items-start gap-3">
               <div className="w-3 h-3 rounded-full mt-2" style={{background: s.color}}></div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
@@ -106,8 +106,8 @@ export default function CryptoScannerPanel(){
           </div>
           <div className="max-h-64 overflow-auto bg-[rgba(255,255,255,0.02)] p-3 rounded">
             {live.events.length === 0 && <div className="text-slate-400">No events yet</div>}
-            {live.events.map((e:any)=> (
-              <div key={e.id} className="py-1 border-b border-[rgba(255,255,255,0.02)] text-sm">
+            {live.events.map((e:any, eidx)=> (
+              <div key={`${e.id}-${eidx}`} className="py-1 border-b border-[rgba(255,255,255,0.02)] text-sm">
                 <div className="flex items-center justify-between">
                   <div className="font-medium">{e.type} • {e.token}</div>
                   <div className="text-slate-400 text-xs">{e.when}</div>
