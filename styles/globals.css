@@ -227,6 +227,67 @@ body{margin:0;font-family:var(--font-inter),'Inter','Segoe UI',system-ui,sans-se
 .nav-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:999px;color:#e9d5ff;font-size:15px;font-weight:700;text-shadow:0 0 18px rgba(196,181,253,0.16);transition:background .18s,color .18s,transform .18s}
 .nav-link:hover{background:rgba(196,181,253,0.11);color:#ffffff;transform:translateY(-1px)}
 .nav-link-button{border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;color:#e9d5ff}
+
+/* Donation button — animated iridescent shine (rotating gradient layers +
+   blend-mode text overlay), recolored to the cyan/violet accent the navbar
+   already uses (text-neon + nav-pill border/glow) rather than the separate
+   deep-green terminal theme used deeper in the app. Sized down from the
+   original reference markup to fit a navbar pill instead of a hero CTA. */
+.btn-wrapper{
+  --rad:999px;
+  --color-wrapper-border:rgba(196,181,253,0.5);
+  --color-btn-bg:#1c1638;
+  --color-btn-text:#fff;
+  --color-btn-text-shadow:#000;
+  --color-btn-inset-shadow:#2a2158;
+  --color-layer-a:#00f0ff;
+  --color-layer-b:#a855f7;
+  --color-overlay-text:#fff;
+  --color-overlay-glow:#fff;
+  --color-overlay-shadow:#0006;
+  --color-overlay-highlight:#fff5;
+  position:relative;display:inline-flex;align-items:center;
+  overflow:clip;overflow-clip-margin:4px;
+  border:1.5px solid var(--color-wrapper-border);
+  border-radius:var(--rad);
+  font-family:inherit;font-size:13px;font-weight:700;
+  filter:saturate(.75) brightness(1.55);
+  cursor:pointer;background:none;padding:0;
+}
+.btn-wrapper .btn-icon{position:relative;z-index:2;padding-left:14px;pointer-events:none}
+.gradient-btn{
+  position:relative;z-index:-1;
+  padding:9px 18px;border:none;border-radius:var(--rad);
+  font:inherit;letter-spacing:.05rem;
+  color:var(--color-btn-text);background-color:var(--color-btn-bg);
+  background-size:200% 200%;
+  box-shadow:inset 0 0 8px 6px var(--color-btn-inset-shadow);
+  text-shadow:0 1px 3px var(--color-btn-text-shadow);
+  cursor:pointer;mix-blend-mode:color-dodge;
+  transition:color .3s ease,text-shadow .3s ease;
+}
+.gradient-layer{
+  position:absolute;pointer-events:none;left:-160px;width:500%;aspect-ratio:1;
+  background:radial-gradient(ellipse at 65% 180%,var(--color-layer-a),var(--color-layer-b),var(--color-layer-a),var(--color-layer-b),var(--color-layer-a),var(--color-layer-b),var(--color-layer-a),var(--color-layer-b),var(--color-layer-a),var(--color-layer-b),var(--color-layer-a));
+  mix-blend-mode:difference;animation:btn-shine-rotate 8s linear infinite;
+}
+.gradient-layer:last-child{mix-blend-mode:color-dodge}
+@keyframes btn-shine-rotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.text-overlay{
+  position:absolute;pointer-events:none;z-index:2;
+  padding:9px 18px;border-radius:var(--rad);
+  font:inherit;letter-spacing:.05rem;
+  color:var(--color-overlay-text);text-shadow:0 0 4px var(--color-overlay-glow);
+  box-shadow:inset 0 -3px 3px 0 var(--color-overlay-shadow),inset 0 3px 3px 0 var(--color-overlay-highlight);
+  mix-blend-mode:multiply;transition:transform .3s ease;animation:btn-shine-opacity 5s ease infinite;
+}
+.btn-wrapper:hover .text-overlay{transform:scale(1.08)}
+.btn-wrapper:hover .gradient-btn{color:#0000;text-shadow:0 0 0 #0000}
+.btn-wrapper:active .text-overlay{transform:scale(0.95)}
+.btn-wrapper:active .gradient-btn{color:#0000;text-shadow:0 0 0 #0000}
+.btn-light{position:absolute;pointer-events:none;z-index:1;border-radius:50px;width:70%;height:1rem;background-color:#fff5;filter:blur(4px);animation:btn-shine-pulse 3s ease-in-out infinite}
+@keyframes btn-shine-pulse{0%,100%{opacity:1}50%{opacity:.1}}
+@keyframes btn-shine-opacity{0%,100%{opacity:1}50%{opacity:.5}}
 .nav-dropdown{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);z-index:99999;padding:10px;border-radius:22px;background:linear-gradient(145deg,rgba(24,20,45,0.98),rgba(11,18,32,0.98));border:1px solid rgba(196,181,253,0.18);box-shadow:0 24px 70px rgba(0,0,0,0.42),inset 0 1px 0 rgba(255,255,255,0.08);pointer-events:auto}
 .nav-dropdown-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;color:#dbeafe;font-size:14px;font-weight:700;white-space:nowrap;transition:background .18s,color .18s,transform .18s}
 .nav-dropdown-item:hover{background:rgba(0,240,255,0.1);color:white;transform:translateX(2px)}

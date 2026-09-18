@@ -117,8 +117,16 @@ export default function DonationButton() {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="btn-theme btn-theme-sm">
-        💝 Donation
+      <button onClick={() => setOpen(true)} className="btn-wrapper" aria-label="Support this project with a donation">
+        <div className="btn-light" />
+        <div className="gradient-layer" style={{ animationDelay: '0s', animationDuration: '25s' }} />
+        <div className="gradient-layer" style={{ animationDelay: '0.15s', animationDuration: '15.9s' }} />
+        <div className="gradient-layer" style={{ animationDelay: '0.53s', animationDuration: '26.4s' }} />
+        <div className="gradient-layer" style={{ animationDelay: '0.45s', animationDuration: '17.8s' }} />
+        <div className="gradient-layer" style={{ animationDelay: '1.6s', animationDuration: '19.2s' }} />
+        <span className="btn-icon">💝</span>
+        <span className="gradient-btn">Donation</span>
+        <span className="text-overlay">Donation</span>
       </button>
 
       {modal && typeof document !== 'undefined'
