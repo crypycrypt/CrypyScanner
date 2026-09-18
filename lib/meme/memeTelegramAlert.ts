@@ -6,7 +6,7 @@
 //  telegramAlertButtons.js user. Memakai CONFIG YANG SUDAH ADA:
 //    • TELEGRAM_BOT_TOKEN  (env, sama seperti lib/telegramNotify.ts)
 //    • chatId default -1004431059985 (grup super forum, sama seperti telegramNotify)
-//    • topic default 2 (topik TRADE) — bisa di-override TELEGRAM_MEME_TOPIC_ID
+//    • topic default 21662 (topik khusus Meme's) — bisa di-override TELEGRAM_MEME_TOPIC_ID
 //
 //  Sifat:
 //    • Fire-and-forget — TIDAK PERNAH melempar error ke pemanggil (route radar).
@@ -33,7 +33,7 @@ import { DATA_DIR } from '../dataDir'
 const TG = {
   botToken: () => (process.env.TELEGRAM_BOT_TOKEN || '').trim(),
   chatId: () => (process.env.TELEGRAM_CHAT_ID || '-1004431059985').trim(),
-  topicId: () => parseInt(process.env.TELEGRAM_MEME_TOPIC_ID || '2', 10) || 0,
+  topicId: () => parseInt(process.env.TELEGRAM_MEME_TOPIC_ID || '21662', 10) || 0,
   captionLimit: 1024,        // batas caption pesan bergambar Telegram
   sendTimeoutMs: 10_000,
   minIntervalMs: 3_000,      // jeda antar pesan (≈20 pesan/menit, aman per grup)
