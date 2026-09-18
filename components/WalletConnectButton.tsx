@@ -124,8 +124,7 @@ export default function DonationButton() {
         <div className="gradient-layer" style={{ animationDelay: '0.53s', animationDuration: '26.4s' }} />
         <div className="gradient-layer" style={{ animationDelay: '0.45s', animationDuration: '17.8s' }} />
         <div className="gradient-layer" style={{ animationDelay: '1.6s', animationDuration: '19.2s' }} />
-        <span className="btn-icon">💝</span>
-        <span className="gradient-btn">Donation</span>
+        <span className="gradient-btn" aria-hidden="true">Donation</span>
         <span className="text-overlay">Donation</span>
       </button>
 

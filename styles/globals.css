@@ -254,17 +254,17 @@ body{margin:0;font-family:var(--font-inter),'Inter','Segoe UI',system-ui,sans-se
   filter:saturate(.75) brightness(1.55);
   cursor:pointer;background:none;padding:0;
 }
-.btn-wrapper .btn-icon{position:relative;z-index:2;padding-left:14px;pointer-events:none}
+/* Invisible (color:transparent) — exists purely so the wrapper sizes
+   itself to the label's width; the pill/shine look comes from its
+   background + mix-blend-mode, the actual visible glyphs are .text-overlay. */
 .gradient-btn{
   position:relative;z-index:-1;
   padding:9px 18px;border:none;border-radius:var(--rad);
-  font:inherit;letter-spacing:.05rem;
-  color:var(--color-btn-text);background-color:var(--color-btn-bg);
+  font:inherit;letter-spacing:.05rem;color:transparent;
+  background-color:var(--color-btn-bg);
   background-size:200% 200%;
   box-shadow:inset 0 0 8px 6px var(--color-btn-inset-shadow);
-  text-shadow:0 1px 3px var(--color-btn-text-shadow);
   cursor:pointer;mix-blend-mode:color-dodge;
-  transition:color .3s ease,text-shadow .3s ease;
 }
 .gradient-layer{
   position:absolute;pointer-events:none;left:-160px;width:500%;aspect-ratio:1;
@@ -273,21 +273,21 @@ body{margin:0;font-family:var(--font-inter),'Inter','Segoe UI',system-ui,sans-se
 }
 .gradient-layer:last-child{mix-blend-mode:color-dodge}
 @keyframes btn-shine-rotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+/* Plain, solid, always-legible label — deliberately NOT blend-moded or
+   opacity-animated like the reference markup's overlay, so the text reads
+   the same regardless of what the shine layers are doing behind it. */
 .text-overlay{
-  position:absolute;pointer-events:none;z-index:2;
+  position:absolute;z-index:5;pointer-events:none;
   padding:9px 18px;border-radius:var(--rad);
   font:inherit;letter-spacing:.05rem;
-  color:var(--color-overlay-text);text-shadow:0 0 4px var(--color-overlay-glow);
-  box-shadow:inset 0 -3px 3px 0 var(--color-overlay-shadow),inset 0 3px 3px 0 var(--color-overlay-highlight);
-  mix-blend-mode:multiply;transition:transform .3s ease;animation:btn-shine-opacity 5s ease infinite;
+  color:var(--color-overlay-text);
+  text-shadow:0 1px 3px rgba(0,0,0,0.85),0 0 10px rgba(0,0,0,0.5);
+  transition:transform .2s ease;
 }
-.btn-wrapper:hover .text-overlay{transform:scale(1.08)}
-.btn-wrapper:hover .gradient-btn{color:#0000;text-shadow:0 0 0 #0000}
+.btn-wrapper:hover .text-overlay{transform:scale(1.06)}
 .btn-wrapper:active .text-overlay{transform:scale(0.95)}
-.btn-wrapper:active .gradient-btn{color:#0000;text-shadow:0 0 0 #0000}
 .btn-light{position:absolute;pointer-events:none;z-index:1;border-radius:50px;width:70%;height:1rem;background-color:#fff5;filter:blur(4px);animation:btn-shine-pulse 3s ease-in-out infinite}
 @keyframes btn-shine-pulse{0%,100%{opacity:1}50%{opacity:.1}}
-@keyframes btn-shine-opacity{0%,100%{opacity:1}50%{opacity:.5}}
 .nav-dropdown{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);z-index:99999;padding:10px;border-radius:22px;background:linear-gradient(145deg,rgba(24,20,45,0.98),rgba(11,18,32,0.98));border:1px solid rgba(196,181,253,0.18);box-shadow:0 24px 70px rgba(0,0,0,0.42),inset 0 1px 0 rgba(255,255,255,0.08);pointer-events:auto}
 .nav-dropdown-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;color:#dbeafe;font-size:14px;font-weight:700;white-space:nowrap;transition:background .18s,color .18s,transform .18s}
 .nav-dropdown-item:hover{background:rgba(0,240,255,0.1);color:white;transform:translateX(2px)}
