@@ -14,7 +14,7 @@ import WhaleAlertsWidget from '../../components/dashboard/WhaleAlertsWidget'
 import CoinScannerWidget from '../../components/dashboard/CoinScannerWidget'
 import AIDailyBrief from '../../components/crypto-scanner/AIDailyBrief'
 import { ReactQueryProvider } from '../../lib/queryClient'
-import LiveMarketIndicators from '../../components/dashboard/LiveMarketIndicators'
+import AiInputToy from '../../components/home/AiInputToy'
 
 const quickActions = [
   { title: 'Scan Whale Alerts', desc: 'Pantau akumulasi/distribusi whale real-time', href: '/dashboard' },
@@ -48,27 +48,25 @@ export default function HomeGamePage() {
 
   return (
     <ReactQueryProvider>
-    <div className="space-y-8">
+    <div className="wide-shell space-y-8">
       <section className="home-command-card relative overflow-hidden rounded-3xl card-glass p-6 sm:p-8">
         <ParallaxBackground />
         <ForegroundHUD />
         <img src="/assets/ic_dashboard_1.svg" alt="" className="home-command-bg-image home-command-bg-image-main" />
         <img src="/assets/ic_build.png" alt="" className="home-command-bg-image home-command-bg-image-secondary" />
-        <div className="relative z-10">
-          <h1 className="text-4xl sm:text-5xl font-game text-neon mb-3">Crypy Crypto Scanner</h1>
-          <p className="text-slate-300 max-w-xl">
-            Mode cepat untuk akses fitur utama: berita market, narrative tracker, whale alert, dan aksi instan scanner.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/dashboard" className="btn-theme">Open Dashboard</Link>
-            <Link href="/crypto-scanner" className="btn-theme">Open Scanner</Link>
+        <div className="relative z-10 flex flex-col lg:flex-row items-center lg:items-start justify-between gap-6">
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-game text-neon mb-3">Crypy Crypto Scanner</h1>
+            <p className="text-slate-300 max-w-xl">
+              Mode cepat untuk akses fitur utama: berita market, narrative tracker, whale alert, dan aksi instan scanner.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href="/dashboard" className="btn-theme">Open Dashboard</Link>
+              <Link href="/crypto-scanner" className="btn-theme">Open Scanner</Link>
+            </div>
           </div>
+          <AiInputToy />
         </div>
-      </section>
-
-      {/* Live Indicators: Signal · Futures · Whale */}
-      <section>
-        <LiveMarketIndicators />
       </section>
 
       {/* Market Direction + Fear & Greed */}

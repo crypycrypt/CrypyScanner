@@ -1,0 +1,579 @@
+/* AI Input Toy — decorative interactive widget for the Home hero card.
+   Adapted from a user-supplied sample; all classes are prefixed `aitoy-`
+   to avoid collisions with the shared `.card` class in globals.css.
+   Colors recolored to the site's neon cyan / purple / green accent palette
+   (see --neon in globals.css) instead of the original light theme. */
+
+.aitoy-slot {
+  position: relative;
+  width: 220px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .aitoy-slot {
+    display: none;
+  }
+}
+
+.aitoy-container {
+  --perspective: 1000px;
+  --translateY: 45px;
+  position: absolute;
+  left: -1.5rem;
+  right: -1.5rem;
+  top: -1.5rem;
+  bottom: -1.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  transform-style: preserve-3d;
+}
+
+.aitoy-wrap {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 9;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.aitoy-wrap:hover {
+  padding: 0;
+}
+
+.aitoy-wrap:active {
+  transform: translateX(-50%) translateY(-50%) scale(0.95);
+}
+
+.aitoy-wrap:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-55%);
+  width: 12rem;
+  height: 11rem;
+  background-color: rgba(8, 14, 28, 0.92);
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.12);
+  border-radius: 3.2rem;
+  transition: all 0.3s ease;
+}
+
+.aitoy-wrap:hover:after {
+  transform: translateX(-50%) translateY(-50%);
+  height: 12rem;
+}
+
+.aitoy-wrap input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.aitoy-wrap input:checked + .aitoy-card .aitoy-eyes {
+  opacity: 0;
+}
+
+.aitoy-wrap input:checked + .aitoy-card .aitoy-content-card {
+  width: 260px;
+  height: 160px;
+}
+
+.aitoy-wrap input:checked + .aitoy-card .aitoy-blur-balls {
+  border-radius: 20px;
+}
+
+.aitoy-wrap input:checked + .aitoy-card .aitoy-chat-panel {
+  opacity: 1;
+  visibility: visible;
+  z-index: 99999;
+  pointer-events: visible;
+}
+
+.aitoy-card {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: all 0.6s ease;
+  border-radius: 3rem;
+  display: flex;
+  align-items: center;
+  transform: translateZ(50px);
+  justify-content: center;
+}
+
+.aitoy-card:hover {
+  box-shadow:
+    0 10px 40px rgba(0, 240, 255, 0.25),
+    inset 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.aitoy-blur-balls {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  width: 100%;
+  height: 100%;
+  z-index: -10;
+  border-radius: 3rem;
+  transition: all 0.3s ease;
+  background-color: rgba(6, 10, 20, 0.75);
+  overflow: hidden;
+}
+
+.aitoy-balls {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  animation: aitoy-rotate-balls 10s linear infinite;
+}
+
+.aitoy-wrap:hover .aitoy-balls {
+  animation-play-state: paused;
+}
+
+.aitoy-blur-balls .aitoy-ball {
+  width: 6rem;
+  height: 6rem;
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(30px);
+}
+
+.aitoy-blur-balls .aitoy-ball.aitoy-violet {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #a855f7;
+}
+
+.aitoy-blur-balls .aitoy-ball.aitoy-green {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #22c55e;
+}
+
+.aitoy-blur-balls .aitoy-ball.aitoy-rosa {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  background-color: #f472b6;
+}
+
+.aitoy-blur-balls .aitoy-ball.aitoy-cyan {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background-color: #00f0ff;
+}
+
+.aitoy-content-card {
+  width: 12rem;
+  height: 12rem;
+  display: flex;
+  border-radius: 3rem;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.aitoy-blur-card {
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(50px);
+}
+
+.aitoy-eyes {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  gap: 2rem;
+  transition: all 0.3s ease;
+}
+
+.aitoy-eyes .aitoy-eye {
+  width: 26px;
+  height: 52px;
+  background-color: #f0fdff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+  border-radius: 16px;
+  animation: aitoy-animate-eyes 10s infinite linear;
+  transition: all 0.3s ease;
+}
+
+.aitoy-eyes.aitoy-happy {
+  display: none;
+  color: #f0fdff;
+  gap: 0;
+}
+
+.aitoy-eyes.aitoy-happy svg {
+  width: 60px;
+}
+
+.aitoy-wrap:hover .aitoy-eyes .aitoy-eye {
+  display: none;
+}
+
+.aitoy-wrap:hover .aitoy-eyes.aitoy-happy {
+  display: flex;
+}
+
+.aitoy-chat-panel {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.aitoy-wrap .aitoy-card .aitoy-chat {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  border-radius: 15px;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  overflow: hidden;
+  background-color: #0b1220;
+  border: 1px solid rgba(0, 240, 255, 0.12);
+}
+
+.aitoy-wrap .aitoy-card .aitoy-chat .aitoy-chat-bot {
+  position: relative;
+  display: flex;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea {
+  background-color: transparent;
+  border-radius: 16px;
+  border: none;
+  width: 100%;
+  height: 100%;
+  color: #cbd5e1;
+  font-family: sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 10px;
+  resize: none;
+  outline: none;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea::-webkit-scrollbar {
+  width: 6px;
+  height: 10px;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 5px;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+  cursor: pointer;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea::placeholder {
+  color: #475569;
+  transition: all 0.3s ease;
+}
+
+.aitoy-card .aitoy-chat .aitoy-chat-bot textarea:focus::placeholder {
+  color: #94a3b8;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 10px;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options button {
+  transition: all 0.3s ease;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btns-add {
+  display: flex;
+  gap: 8px;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btns-add button {
+  display: flex;
+  color: rgba(255, 255, 255, 0.3);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btns-add button:hover {
+  transform: translateY(-5px);
+  color: #00f0ff;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit {
+  display: flex;
+  padding: 2px;
+  background-image: linear-gradient(to top, #22c55e, #00f0ff, #a855f7);
+  border-radius: 10px;
+  box-shadow: inset 0 6px 2px -4px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  opacity: 0.75;
+  transition: all 0.15s ease;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit i {
+  width: 30px;
+  height: 30px;
+  padding: 6px;
+  background: rgba(2, 6, 23, 0.4);
+  border-radius: 10px;
+  backdrop-filter: blur(3px);
+  color: #e2e8f0;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit svg {
+  transition: all 0.3s ease;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit:hover {
+  opacity: 1;
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit:hover svg {
+  color: #f3f6fd;
+  filter: drop-shadow(0 0 5px #00f0ff);
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit:focus svg {
+  color: #f3f6fd;
+  filter: drop-shadow(0 0 5px #00f0ff);
+  transform: scale(1.2) rotate(45deg) translateX(-2px) translateY(1px);
+}
+
+.aitoy-card .aitoy-chat .aitoy-options .aitoy-btn-submit:active {
+  transform: scale(0.92);
+}
+
+.aitoy-area:nth-child(15):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(15):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(-15deg) rotateY(15deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(14):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(14):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(-15deg) rotateY(7deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(13):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(13):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(-15deg) rotateY(0)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(12):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(12):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(-15deg) rotateY(-7deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(11):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(11):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(-15deg) rotateY(-15deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(10):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(10):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(0) rotateY(15deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(9):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(9):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(0) rotateY(7deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(8):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(8):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(0) rotateY(0)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(7):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(7):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(0) rotateY(-7deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(6):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(6):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(0) rotateY(-15deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(5):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(5):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(15deg) rotateY(15deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(4):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(4):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(15deg) rotateY(7deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(3):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(3):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(15deg) rotateY(0)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(2):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(2):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(15deg) rotateY(-7deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+.aitoy-area:nth-child(1):hover ~ .aitoy-wrap .aitoy-card,
+.aitoy-area:nth-child(1):hover ~ .aitoy-wrap .aitoy-eyes .aitoy-eye {
+  transform: perspective(var(--perspective)) rotateX(15deg) rotateY(-15deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(15):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(15):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(-10deg) rotateY(8deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(14):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(14):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(-10deg) rotateY(4deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(13):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(13):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(-10deg) rotateY(0deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(12):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(12):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(-10deg) rotateY(-4deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(11):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(11):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(-10deg) rotateY(-8deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(10):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(10):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(0deg) rotateY(8deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(9):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(9):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(0deg) rotateY(4deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(8):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(8):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(0deg) rotateY(0deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(7):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(7):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(0deg) rotateY(-4deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(6):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(6):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(0deg) rotateY(-8deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(5):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(5):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(10deg) rotateY(8deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(4):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(4):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(10deg) rotateY(4deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(3):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(3):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(10deg) rotateY(0deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(2):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(2):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(10deg) rotateY(-4deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+.aitoy-area:nth-child(1):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-options button,
+.aitoy-area:nth-child(1):hover ~ .aitoy-wrap .aitoy-card .aitoy-chat-panel .aitoy-chat .aitoy-chat-bot {
+  transform: perspective(var(--perspective)) rotateX(10deg) rotateY(-8deg)
+    translateZ(var(--translateY)) scale3d(1, 1, 1);
+}
+
+@keyframes aitoy-rotate-balls {
+  from {
+    transform: translateX(-50%) translateY(-50%) rotate(360deg);
+  }
+  to {
+    transform: translateX(-50%) translateY(-50%) rotate(0);
+  }
+}
+
+@keyframes aitoy-animate-eyes {
+  46% { height: 52px; }
+  48% { height: 20px; }
+  50% { height: 52px; }
+  96% { height: 52px; }
+  98% { height: 20px; }
+  100% { height: 52px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aitoy-balls,
+  .aitoy-eyes .aitoy-eye {
+    animation: none;
+  }
+}

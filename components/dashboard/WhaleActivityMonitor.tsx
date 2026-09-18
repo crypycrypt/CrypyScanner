@@ -2,6 +2,131 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTopCoinsForFutures } from '../../lib/useFuturesAnalysis'
+import { getFuturesAnalysis } from '../crypto-scanner/FuturesAnalysis'
+
+interface SignalBadge {
+  label: string
+  hint: string
+  color: string
+  bg: string
+}
+
+function fmtBadgePrice(n: number): string {
+  if (!n || !Number.isFinite(n)) return '—'
+  if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`
+  if (n >= 1) return `$${n.toFixed(2)}`
+  if (n >= 0.01) return `$${n.toFixed(4)}`
+  return `$${n.toFixed(6)}`
+}
+
+// Replica of the former LiveMarketIndicators.getTradingSignal() — actionable signal badge per coin
+function getTradingSignal(coin: any): SignalBadge {
+  const price = coin.current_price || 0
+  const ch24h = coin.price_change_percentage_24h || 0
+  const ch7d = coin.price_change_percentage_7d_in_currency || 0
+  const prices = coin.sparkline_in_7d?.price || []
+  const volRatio = coin.market_cap ? coin.total_volume / coin.market_cap : 0
+
+  let support: number | null = null
+  let resistance: number | null = null
+  if (prices.length >= 10) {
+    const sorted = [...prices].sort((a: number, b: number) => a - b)
+    support = sorted[Math.floor(sorted.length * 0.1)]
+    resistance = sorted[Math.floor(sorted.length * 0.9)]
+  }
+
+  const low7d = prices.length ? Math.min(...prices) : price * 0.85
+  const high7d = prices.length ? Math.max(...prices) : price * 1.15
+  const range = high7d - low7d || 1
+  const posInRange = (price - low7d) / range
+
+  const nearSupport = posInRange < 0.2
+  const nearResistance = posInRange > 0.8
+  const midZone = posInRange >= 0.35 && posInRange <= 0.65
+
+  const strongBull = ch24h > 5 && ch7d > 10 && volRatio > 0.1
+  const mildBull = ch24h > 0 && ch7d > 0
+  const strongBear = ch24h < -5 && ch7d < -10
+  const highRisk = volRatio > 0.5 || Math.abs(ch24h) > 15
+
+  const fmt = fmtBadgePrice
+
+  if (highRisk && ch24h < -10) {
+    return { label: '⚠️ Risiko Tinggi', hint: 'Volatilitas ekstrem, hindari entry', color: '#f87171', bg: 'rgba(239,68,68,0.15)' }
+  }
+
+  if (strongBull && nearSupport) {
+    const tp = fmt(support ? support * 1.15 : price * 1.12)
+    const sl = fmt(support ? support * 0.96 : price * 0.95)
+    return { label: `🟢 Beli di ${fmt(price)}`, hint: `TP ${tp} · SL ${sl}`, color: '#4ade80', bg: 'rgba(34,197,94,0.15)' }
+  }
+
+  if (mildBull && nearSupport && !highRisk) {
+    const tp = fmt(price * 1.08)
+    return { label: `🟢 Beli di ${fmt(price)}`, hint: `TP ${tp} · konfirmasi volume`, color: '#4ade80', bg: 'rgba(34,197,94,0.15)' }
+  }
+
+  if (nearResistance && mildBull) {
+    const waitPrice = fmt(resistance ? resistance * 0.92 : price * 0.92)
+    return { label: '⏳ Tunggu pullback', hint: `Entry ideal ≈ ${waitPrice}`, color: '#facc15', bg: 'rgba(234,179,8,0.15)' }
+  }
+
+  if (midZone && ch24h > 0 && ch24h < 3) {
+    const entryIdeal = fmt(support ? support * 1.01 : price * 0.96)
+    return { label: `⏳ Tunggu di ${entryIdeal}`, hint: 'Belum ada konfirmasi breakout', color: '#facc15', bg: 'rgba(234,179,8,0.15)' }
+  }
+
+  if (nearResistance && (strongBear || ch24h < -3)) {
+    const sl = fmt(resistance ? resistance * 1.03 : price * 1.03)
+    return { label: '🔴 Jual / Hindari', hint: `Resistensi kuat, SL ${sl}`, color: '#f87171', bg: 'rgba(239,68,68,0.15)' }
+  }
+
+  if (strongBear) {
+    const reboundZone = fmt(low7d * 1.05)
+    return { label: '🔴 Distribusi', hint: `Tunggu rebound ≈ ${reboundZone}`, color: '#f87171', bg: 'rgba(239,68,68,0.15)' }
+  }
+
+  if (mildBull && midZone) {
+    const tp = fmt(resistance || price * 1.08)
+    return { label: '🔵 Hold', hint: `Target ${tp}, tahan posisi`, color: '#60a5fa', bg: 'rgba(59,130,246,0.15)' }
+  }
+
+  if (ch24h < -3) {
+    const waitEntry = fmt(low7d * 1.02)
+    return { label: '⏳ Tunggu sinyal', hint: `Entry aman ≈ ${waitEntry}`, color: '#facc15', bg: 'rgba(234,179,8,0.15)' }
+  }
+
+  return { label: '🔵 Netral', hint: 'Pantau pergerakan volume', color: '#60a5fa', bg: 'rgba(59,130,246,0.15)' }
+}
+
+// Futures recommendation: explicit LONG / SHORT decision with leverage
+function getFuturesRecommendation(coin: any): SignalBadge {
+  const f = getFuturesAnalysis(coin)
+  if (f.isNeutral) {
+    return { label: '⚪ Hindari Futures', hint: 'Tunggu konfirmasi breakout', color: '#94a3b8', bg: 'rgba(148,163,184,0.15)' }
+  }
+  const isLong = f.direction.startsWith('long')
+  const weak = f.direction.includes('weak') ? ' (Lemah)' : ''
+  const label = isLong ? '🟢 Ambil LONG' : '🔴 Ambil SHORT'
+  return {
+    label: label + weak,
+    hint: `Leverage ${f.leverage}×`,
+    color: isLong ? '#4ade80' : '#f87171',
+    bg: isLong ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'
+  }
+}
+
+function SignalBadgeCell({ badge }: { badge: SignalBadge }) {
+  return (
+    <div className="inline-flex flex-col items-start gap-0.5" style={{ color: badge.color }}>
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-md border" style={{ backgroundColor: badge.bg, borderColor: badge.color + '40' }}>
+        {badge.label}
+      </span>
+      <span className="text-[10px] text-slate-400 leading-tight">{badge.hint}</span>
+    </div>
+  )
+}
 
 interface WhaleData {
   id: string
@@ -92,6 +217,12 @@ export default function WhaleActivityMonitor() {
     refetchInterval: 3 * 60 * 1000, // 3 minutes (matching crypto-scanner)
     staleTime: 2 * 60 * 1000,
   })
+
+  // Signal/Futures badges — merged in from the former standalone "Live Market
+  // Indicators" section. Keyed by CoinGecko id so each whale row can look up
+  // its matching sparkline-based coin data (only covers the top-50 by market cap).
+  const { data: signalCoins } = useTopCoinsForFutures()
+  const signalCoinMap = new Map<string, any>((signalCoins || []).map((c: any) => [c.id, c]))
 
   useEffect(() => {
     if (data?.whales) {
@@ -188,13 +319,15 @@ export default function WhaleActivityMonitor() {
               <th>Vol/MC Ratio</th>
               <th>Market Cap</th>
               <th>Sinyal</th>
+              <th>Trading Signal</th>
+              <th>⚡ Futures</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {hasError ? (
               <tr>
-                <td colSpan={10} style={{ textAlign: 'center', padding: '32px' }}>
+                <td colSpan={12} style={{ textAlign: 'center', padding: '32px' }}>
                   <div className="pt-empty">
                     <div className="pt-empty-icon">🐳</div>
                     <div className="pt-empty-title">Gagal memuat whale data</div>
@@ -207,7 +340,7 @@ export default function WhaleActivityMonitor() {
               </tr>
             ) : loading ? (
               <tr>
-                <td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: '#475569' }}>
+                <td colSpan={12} style={{ textAlign: 'center', padding: '32px', color: '#475569' }}>
                   <div className="screener-loading">
                     <span className="g-spinner"></span>
                     <span>Memuat whale data…</span>
@@ -216,7 +349,7 @@ export default function WhaleActivityMonitor() {
               </tr>
             ) : filteredWhales.length === 0 ? (
               <tr>
-                <td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: '#475569' }}>
+                <td colSpan={12} style={{ textAlign: 'center', padding: '32px', color: '#475569' }}>
                   <div className="pt-empty">
                     <div className="pt-empty-icon">🐳</div>
                     <div className="pt-empty-title">Tidak ada whale activity</div>
@@ -229,6 +362,7 @@ export default function WhaleActivityMonitor() {
                 const badge = whaleBadge(whale.volMcRatio)
                 const ch24 = whale.priceChange24h ?? 0
                 const signals = whale.signals || []
+                const signalCoin = signalCoinMap.get(whale.id)
 
                 return (
                   <tr key={whale.id} className="whale-row">
@@ -296,6 +430,20 @@ export default function WhaleActivityMonitor() {
                           <span key={i} className="screener-signal">{s}</span>
                         ))}
                       </div>
+                    </td>
+                    <td>
+                      {signalCoin ? (
+                        <SignalBadgeCell badge={getTradingSignal(signalCoin)} />
+                      ) : (
+                        <span style={{ color: '#334155', fontSize: '11px' }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      {signalCoin ? (
+                        <SignalBadgeCell badge={getFuturesRecommendation(signalCoin)} />
+                      ) : (
+                        <span style={{ color: '#334155', fontSize: '11px' }}>—</span>
+                      )}
                     </td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: '4px' }}>
