@@ -243,9 +243,76 @@
   height: 154px;
   border-radius: 50%;
   z-index: 8;
-  background: radial-gradient(circle at 50% 45%, #e9f8f2 0 8%, #9fe7d0 9% 13%, #16251f 14% 34%, #0b1211 35% 57%, var(--nx-green) 58% 60%, #10251f 61%);
-  box-shadow: 0 0 0 1px rgba(37,229,162,.27), 0 0 50px rgba(37,229,162,.13), inset 0 0 35px rgba(37,229,162,.07);
-  animation: nx-corepulse var(--pulse-dur, 2.7s) ease-in-out infinite;
+}
+/* Radar-ping rings emanating from the core — sit behind the orb body so
+   they read as pulses coming *from* it, not floating separately. */
+.nx-core-wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(37,229,162,0);
+  animation: nx-core-wave-expand 3s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes nx-core-wave-expand {
+  0% { transform: scale(1); border-color: rgba(37,229,162,.55); opacity: 1; }
+  100% { transform: scale(2.4); border-color: rgba(37,229,162,0); opacity: 0; }
+}
+/* The orb itself — organic blob morph + float + glow, conic-gradient sheen
+   rotating inside it, and a soft shimmer highlight. Recolored from the
+   supplied purple/cyan sample to this page's own green/cyan terminal
+   palette (var(--nx-green)/var(--nx-cyan)) so it matches the rest of AI
+   Signal instead of introducing a new accent. */
+.nx-core-orb {
+  position: absolute;
+  inset: 0;
+  border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 35% 32%, rgba(255,255,255,.85) 0%, transparent 14%),
+    radial-gradient(circle at 32% 40%, #baffe0 0%, var(--nx-green) 28%, #0d3d2c 62%, #04120c 100%);
+  box-shadow:
+    inset 0 0 40px rgba(37,229,162,.5),
+    inset -14px -14px 40px rgba(0,0,0,.55),
+    0 0 40px rgba(37,229,162,.55),
+    0 0 90px rgba(37,229,162,.35),
+    0 0 140px rgba(37,229,162,.18);
+  animation:
+    nx-core-float 4s ease-in-out infinite,
+    nx-core-glow var(--pulse-dur, 2.7s) ease-in-out infinite,
+    nx-core-morph 9s ease-in-out infinite;
+}
+.nx-core-orb::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(37,229,162,.45), transparent 30%, transparent 70%, var(--nx-cyan), transparent);
+  opacity: .55;
+  animation: nx-rotate 6s linear infinite;
+}
+.nx-core-orb::after {
+  content: "";
+  position: absolute;
+  top: 14%;
+  left: 18%;
+  width: 52%;
+  height: 52%;
+  background: radial-gradient(circle, rgba(255,255,255,.55) 0%, transparent 60%);
+  border-radius: 50%;
+  filter: blur(14px);
+  animation: nx-core-shimmer 3s ease-in-out infinite;
+}
+@keyframes nx-core-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes nx-core-glow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+@keyframes nx-core-shimmer { 0%, 100% { opacity: .35; transform: translate(0,0) scale(1); } 50% { opacity: .7; transform: translate(8px,6px) scale(1.15); } }
+@keyframes nx-core-morph {
+  0%, 100% { border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%; }
+  25% { border-radius: 46% 54% 50% 50% / 40% 55% 45% 60%; }
+  50% { border-radius: 54% 46% 38% 62% / 49% 65% 35% 51%; }
+  75% { border-radius: 50% 50% 34% 66% / 56% 60% 40% 44%; }
 }
 .nx-core .nx-core-label {
   position: absolute;
@@ -582,7 +649,7 @@
   .nx-core .nx-core-small { top: 89px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .nx-beam, .nx-core, .nx-meter i, .nx-connector, .nx-live i, .nx-ticker-track, .nx-node.live { animation: none !important; }
+  .nx-beam, .nx-core, .nx-core-orb, .nx-core-orb::before, .nx-core-orb::after, .nx-core-wave, .nx-meter i, .nx-connector, .nx-live i, .nx-ticker-track, .nx-node.live { animation: none !important; }
 }
 
 /* ── Readability / larger fonts ──────────────────────────────────────────── */

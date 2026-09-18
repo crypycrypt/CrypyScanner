@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation'
 import WalletConnectButton from './WalletConnectButton'
 
 const cryptoItems = [
-  { href: '/crypto-scanner', label: 'Crypto Scanner', icon: '/assets/ic_chart.svg' },
+  // Hidden for now per request — re-add to bring "Crypto Scanner" back to the menu.
+  // { href: '/crypto-scanner', label: 'Crypto Scanner', icon: '/assets/ic_chart.svg' },
   { href: '/sniper-scanner', label: 'AI Signal', icon: '/assets/ic_fingerprint.svg' },
   { href: '/dex-analyzer', label: "Meme's", icon: '/assets/ic_universe.svg' },
   { href: '/smart-money', label: 'Smart Money', icon: '/assets/ic_ai.svg' },

@@ -289,6 +289,11 @@ export default function SniperScanner() {
                   <div className="nx-connector nx-c6" />
 
                   <div className="nx-core" style={{ '--pulse-dur': `${pulseDur.toFixed(1)}s` } as CssVars}>
+                    <div className="nx-core-wave" />
+                    <div className="nx-core-wave" style={{ animationDelay: '0.75s' }} />
+                    <div className="nx-core-wave" style={{ animationDelay: '1.5s' }} />
+                    <div className="nx-core-wave" style={{ animationDelay: '2.25s' }} />
+                    <div className="nx-core-orb" />
                     <div className="nx-core-label">AI SIGNAL CORE</div>
                     <div className="nx-core-score">{selected ? selected.score : '–'}</div>
                     <div className="nx-core-small">
