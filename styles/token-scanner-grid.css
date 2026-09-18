@@ -1,0 +1,168 @@
+/* Token Scanner Grid — Home page's filterable/searchable token table.
+   Ported from the user's legacy crypto-scanner project (dex-* filter bar +
+   dex-table), recolored from its indigo/purple accents to this app's own
+   cyan/green terminal palette. All classes prefixed `tsg-` to avoid
+   collisions with the pre-existing `.dex-*`/`.whale-*`/`.wa-*` rules
+   already defined elsewhere in the app's CSS. */
+
+.tsg-wrap {
+  background: #0f172a;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.tsg-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 18px 4px;
+}
+.tsg-title { font-size: 1rem; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 8px; }
+.tsg-subtitle { font-size: 0.72rem; color: #475569; padding: 0 18px 12px; }
+
+.tsg-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding: 8px 16px;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.tsg-filter-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tsg-filter-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.tsg-tf-group { display: flex; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 8px; overflow: hidden; }
+.tsg-tf-btn { padding: 5px 12px; font-size: 0.75rem; font-weight: 600; color: #64748b; background: transparent; border: none; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.tsg-tf-btn:hover { background: rgba(255, 255, 255, 0.06); color: #e2e8f0; }
+.tsg-tf-btn.active { background: var(--neon, #00f0ff); color: #04120c; }
+
+.tsg-qf-group { display: flex; gap: 5px; flex-wrap: wrap; }
+.tsg-qf-btn {
+  padding: 5px 12px; font-size: 0.73rem; font-weight: 500; color: #64748b;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.tsg-qf-btn:hover { border-color: rgba(255, 255, 255, 0.25); color: #e2e8f0; }
+.tsg-qf-btn.active { background: rgba(0, 240, 255, 0.15); border-color: var(--neon, #00f0ff); color: #7dfaff; }
+
+.tsg-search-wrap { position: relative; display: flex; align-items: center; }
+.tsg-search-input {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 8px;
+  color: #e2e8f0; font-size: 0.8rem; padding: 6px 10px 6px 28px; width: 170px; outline: none; transition: border-color 0.15s;
+}
+.tsg-search-input::placeholder { color: #475569; }
+.tsg-search-input:focus { border-color: var(--neon, #00f0ff); }
+.tsg-search-icon { position: absolute; left: 9px; font-size: 0.75rem; opacity: 0.5; pointer-events: none; }
+
+.tsg-ai-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 14px; font-size: 0.78rem; font-weight: 600;
+  color: #c9a8ff; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+}
+.tsg-ai-btn:hover { background: rgba(168, 85, 247, 0.28); }
+.tsg-ai-btn.active { background: rgba(168, 85, 247, 0.35); border-color: #a855f7; color: #fff; }
+
+.tsg-refresh-btn {
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem; color: #64748b; background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.18); border-radius: 8px; cursor: pointer; transition: all 0.15s;
+}
+.tsg-refresh-btn:hover { color: #e2e8f0; transform: rotate(90deg); }
+
+.tsg-table-wrap { width: 100%; overflow-x: auto; }
+.tsg-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; white-space: nowrap; }
+.tsg-table thead { position: sticky; top: 0; z-index: 5; background: #0b1220; }
+.tsg-table th {
+  padding: 8px 10px; font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: #64748b; border-bottom: 1px solid rgba(148, 163, 184, 0.12); text-align: right; white-space: nowrap;
+}
+.tsg-table th.tsg-left { text-align: left; }
+.tsg-table th.tsg-sortable { cursor: pointer; user-select: none; }
+.tsg-table th.tsg-sortable:hover { color: #e2e8f0; }
+.tsg-table th.tsg-active-sort { color: var(--neon, #00f0ff); }
+.tsg-sort-arrow { margin-left: 3px; opacity: 0.6; }
+
+.tsg-table tbody tr { border-bottom: 1px solid rgba(148, 163, 184, 0.08); transition: background 0.1s; }
+.tsg-table tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+.tsg-table td { padding: 8px 10px; vertical-align: middle; text-align: right; color: #e2e8f0; }
+.tsg-table td.tsg-left { text-align: left; }
+
+.tsg-btn-fav { background: none; border: none; font-size: 0.95rem; cursor: pointer; color: #475569; line-height: 1; padding: 0; transition: color 0.15s, transform 0.1s; }
+.tsg-btn-fav:hover { color: #fbbf24; transform: scale(1.15); }
+.tsg-btn-fav.active { color: #fbbf24; }
+
+.tsg-token-cell { display: flex; align-items: center; gap: 8px; }
+.tsg-token-img { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; object-fit: cover; }
+.tsg-token-names { display: flex; flex-direction: column; gap: 1px; }
+.tsg-token-name { font-weight: 600; font-size: 0.8rem; color: #f1f5f9; }
+.tsg-token-sym { font-size: 0.65rem; color: #64748b; text-transform: uppercase; }
+
+.tsg-positive { color: #4ade80 !important; }
+.tsg-negative { color: #f87171 !important; }
+
+.age-new { color: #a78bfa; font-size: 0.7rem; }
+.age-mid { color: #64748b; font-size: 0.7rem; }
+.age-old { color: #4ade80; font-size: 0.7rem; }
+
+.tsg-fib-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; cursor: help;
+}
+.tsg-fib-badge.above { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.25); }
+.tsg-fib-badge.below { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.25); }
+.tsg-fib-badge.near { animation: tsg-fib-pulse 1.6s ease-in-out infinite; }
+@keyframes tsg-fib-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15); }
+}
+
+.tsg-signal-badge {
+  display: inline-flex; flex-direction: column; gap: 2px; padding: 3px 8px; border-radius: 6px;
+  font-size: 0.7rem; font-weight: 600; line-height: 1.3; min-width: 108px; max-width: 150px; text-align: left; white-space: normal;
+}
+.tsg-signal-hint { font-weight: 400; font-size: 0.62rem; opacity: 0.8; }
+.tsg-signal-buy { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+.tsg-signal-sell { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.tsg-signal-wait { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.tsg-signal-hold { background: rgba(96, 165, 250, 0.1); color: #93c5fd; border: 1px solid rgba(96, 165, 250, 0.25); }
+.tsg-signal-danger { background: rgba(220, 38, 38, 0.15); color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.4); }
+
+.tsg-futures-badge {
+  display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; letter-spacing: 0.03em;
+}
+.tsg-futures-long { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+.tsg-futures-short { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.tsg-futures-neutral { background: rgba(100, 116, 139, 0.1); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.2); }
+
+.tsg-whale-label { font-size: 0.72rem; color: #93c5fd; font-weight: 600; }
+.tsg-liq-label { font-size: 0.72rem; font-weight: 600; color: #cbd5e1; }
+
+.tsg-action-btn {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; padding: 4px 9px;
+  border-radius: 6px; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.25); color: #7dfaff;
+  cursor: pointer; text-decoration: none; transition: all 0.15s;
+}
+.tsg-action-btn:hover { background: rgba(0, 240, 255, 0.18); }
+
+.tsg-empty, .tsg-loading { text-align: center; padding: 32px; color: #475569; font-size: 0.8rem; }
+
+.tsg-pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
+.tsg-page-btn {
+  font-size: 0.72rem; font-weight: 600; padding: 5px 12px; border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.18); background: rgba(255, 255, 255, 0.03); color: #94a3b8; cursor: pointer;
+}
+.tsg-page-btn:disabled { opacity: 0.4; cursor: default; }
+.tsg-page-btn:not(:disabled):hover { color: #e2e8f0; border-color: rgba(255, 255, 255, 0.3); }
+.tsg-page-info { font-size: 0.72rem; color: #64748b; }
+
+@media (max-width: 700px) {
+  .tsg-search-input { width: 130px; }
+  .tsg-qf-group { display: none; }
+}

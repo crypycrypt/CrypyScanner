@@ -270,15 +270,16 @@
   inset: 0;
   border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
   overflow: hidden;
+  opacity: .62;
   background:
-    radial-gradient(circle at 35% 32%, rgba(255,255,255,.45) 0%, transparent 16%),
-    radial-gradient(circle at 32% 40%, #baffe0 0%, var(--nx-green) 32%, #0d3d2c 66%, #04120c 100%);
+    radial-gradient(circle at 35% 32%, rgba(255,255,255,.22) 0%, transparent 18%),
+    radial-gradient(circle at 32% 40%, rgba(186,255,224,.55) 0%, rgba(40,233,148,.4) 32%, rgba(13,61,44,.28) 66%, rgba(4,18,12,.16) 100%);
   box-shadow:
-    inset 0 0 40px rgba(37,229,162,.28),
-    inset -14px -14px 40px rgba(0,0,0,.4),
-    0 0 30px rgba(37,229,162,.3),
-    0 0 70px rgba(37,229,162,.18),
-    0 0 120px rgba(37,229,162,.09);
+    inset 0 0 40px rgba(37,229,162,.14),
+    inset -14px -14px 40px rgba(0,0,0,.22),
+    0 0 30px rgba(37,229,162,.16),
+    0 0 70px rgba(37,229,162,.09),
+    0 0 120px rgba(37,229,162,.04);
   animation:
     nx-core-float 4s ease-in-out infinite,
     nx-core-glow var(--pulse-dur, 2.7s) ease-in-out infinite,
@@ -291,8 +292,8 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: conic-gradient(from 0deg, transparent, rgba(37,229,162,.25), transparent 30%, transparent 70%, var(--nx-cyan), transparent);
-  opacity: .3;
+  background: conic-gradient(from 0deg, transparent, rgba(37,229,162,.16), transparent 30%, transparent 70%, var(--nx-cyan), transparent);
+  opacity: .18;
   animation: nx-rotate 8s linear infinite;
 }
 .nx-core-orb::after {
@@ -302,14 +303,14 @@
   left: 18%;
   width: 52%;
   height: 52%;
-  background: radial-gradient(circle, rgba(255,255,255,.3) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(255,255,255,.2) 0%, transparent 60%);
   border-radius: 50%;
-  filter: blur(16px);
+  filter: blur(18px);
   animation: nx-core-shimmer 4s ease-in-out infinite;
 }
 @keyframes nx-core-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-@keyframes nx-core-glow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.12); } }
-@keyframes nx-core-shimmer { 0%, 100% { opacity: .2; transform: translate(0,0) scale(1); } 50% { opacity: .4; transform: translate(8px,6px) scale(1.15); } }
+@keyframes nx-core-glow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.06); } }
+@keyframes nx-core-shimmer { 0%, 100% { opacity: .12; transform: translate(0,0) scale(1); } 50% { opacity: .26; transform: translate(8px,6px) scale(1.15); } }
 @keyframes nx-core-morph {
   0%, 100% { border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%; }
   25% { border-radius: 46% 54% 50% 50% / 40% 55% 45% 60%; }
