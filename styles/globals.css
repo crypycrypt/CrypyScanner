@@ -277,13 +277,31 @@ body{margin:0;font-family:var(--font-inter),'Inter','Segoe UI',system-ui,sans-se
 .hero-feature-card span{margin-top:3px;font-size:9px;color:#bae6fd}
 .hero-carousel-visual-label{right:14px;top:14px;bottom:auto}
 
+/* Desktop-only nav row + hamburger button, swapped per breakpoint below
+   instead of unconditionally rendering both — avoids a flash of the wrong
+   one and keeps the toggle out of the tab order on desktop. */
+.nav-burger{display:none;position:relative;z-index:2;width:42px;height:42px;border-radius:999px;border:1px solid rgba(196,181,253,0.22);background:rgba(255,255,255,0.04);align-items:center;justify-content:center;flex-direction:column;gap:5px;cursor:pointer}
+.nav-burger span{display:block;width:20px;height:2px;border-radius:2px;background:#e9d5ff;transition:transform .2s,opacity .2s}
+.nav-burger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.nav-burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.nav-mobile-panel{display:none}
+
 @media(max-width:900px){
-  .nav-pill{border-radius:30px;align-items:flex-start;flex-direction:column;padding:16px 18px}
-  .nav-brand{padding-left:28px}
-  .nav-menu{width:100%;justify-content:flex-start;gap:8px;overflow-x:auto;padding-bottom:2px}
-  .nav-link{min-height:38px;padding:0 12px;font-size:14px}
-  .nav-link-button{font-size:14px}
-  .nav-dropdown{left:0;transform:none}
+  .nav-pill{border-radius:24px;padding:12px 16px}
+  .nav-brand{padding-left:8px}
+  .nav-menu-desktop{display:none}
+  .nav-burger{display:flex}
+  .nav-mobile-panel{display:flex;flex-direction:column;gap:4px;max-width:1152px;margin:8px auto 0;padding:12px;border-radius:20px;background:linear-gradient(135deg,rgba(30,24,58,0.96),rgba(15,23,42,0.96));border:1px solid rgba(196,181,253,0.22);box-shadow:0 24px 80px rgba(2,6,23,0.5)}
+  .nav-mobile-link{padding:12px 14px;border-radius:14px;color:#e9d5ff;font-size:15px;font-weight:700}
+  .nav-mobile-link:active,.nav-mobile-link:hover{background:rgba(196,181,253,0.12)}
+  .nav-mobile-group{padding:4px 0}
+  .nav-mobile-group-label{padding:8px 14px 2px;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#8b7bb8}
+  .nav-mobile-sublink{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;color:#d8ceff;font-size:14px;font-weight:600}
+  .nav-mobile-sublink:active,.nav-mobile-sublink:hover{background:rgba(196,181,253,0.1)}
+  .nav-mobile-sublink img{width:18px;height:18px;object-fit:contain;flex-shrink:0}
+  .nav-mobile-divider{height:1px;margin:6px 4px;background:rgba(196,181,253,0.14)}
+  .nav-mobile-donate{padding:10px 4px 2px}
   .hero-carousel-shell{grid-template-columns:1fr;min-height:auto}
   .hero-carousel-visual{min-height:220px}
   .hero-copy-block{padding-left:84px}

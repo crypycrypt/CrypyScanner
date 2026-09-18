@@ -20,12 +20,14 @@ type MenuKey = 'crypto' | 'stocks' | null
 
 export default function Navbar(){
   const [openMenu, setOpenMenu] = useState<MenuKey>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const pathname = usePathname()
 
   // Close any open menu whenever the route changes (client-side nav keeps this mounted).
   useEffect(() => {
     setOpenMenu(null)
+    setMobileOpen(false)
   }, [pathname])
 
   // Close on outside click / touch.
@@ -56,7 +58,7 @@ export default function Navbar(){
     setOpenMenu((current) => (current === key ? null : key))
   }
 
-  const closeAll = () => setOpenMenu(null)
+  const closeAll = () => { setOpenMenu(null); setMobileOpen(false) }
 
   const renderDropdown = (key: Exclude<MenuKey, null>, label: string, items: { href: string; label: string; icon: string }[]) => {
     const open = openMenu === key
@@ -97,7 +99,7 @@ export default function Navbar(){
           <img src="/assets/ic_aurora%20copy.svg" alt="WhaleRadar AI" className="h-12 w-12 object-contain" />
           <span className="text-neon font-bold text-xl">WhaleRadar AI</span>
         </Link>
-        <div className="nav-menu">
+        <div className="nav-menu nav-menu-desktop">
           <Link href="/home" className="nav-link" onClick={closeAll}>Home</Link>
           <Link href="/dashboard" className="nav-link" onClick={closeAll}>Dashboard</Link>
 
@@ -106,7 +108,51 @@ export default function Navbar(){
 
           <WalletConnectButton />
         </div>
+        <button
+          type="button"
+          className="nav-burger"
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={mobileOpen}
+        >
+          <span /><span /><span />
+        </button>
       </div>
+
+      {mobileOpen && (
+        <div className="nav-mobile-panel" role="menu">
+          <Link href="/home" className="nav-mobile-link" onClick={closeAll} role="menuitem">Home</Link>
+          <Link href="/dashboard" className="nav-mobile-link" onClick={closeAll} role="menuitem">Dashboard</Link>
+
+          <div className="nav-mobile-divider" />
+
+          <div className="nav-mobile-group">
+            <div className="nav-mobile-group-label">Crypto</div>
+            {cryptoItems.map((item) => (
+              <Link href={item.href} className="nav-mobile-sublink" onClick={closeAll} key={item.href} role="menuitem">
+                <img src={item.icon} alt="" />
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="nav-mobile-group">
+            <div className="nav-mobile-group-label">Stocks</div>
+            {stockItems.map((item) => (
+              <Link href={item.href} className="nav-mobile-sublink" onClick={closeAll} key={item.href} role="menuitem">
+                <img src={item.icon} alt="" />
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="nav-mobile-divider" />
+
+          <div className="nav-mobile-donate">
+            <WalletConnectButton />
+          </div>
+        </div>
+      )}
     </nav>
   )
 }
